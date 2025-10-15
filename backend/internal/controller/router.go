@@ -4,10 +4,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/goawwer/yamyard/internal/controller/handlers"
+	"github.com/goawwer/yamyard/internal/controller/handlers/wrapper"
+	usecase "github.com/goawwer/yamyard/internal/usecase/profile"
 	"github.com/goawwer/yamyard/pkg/helpers"
 )
 
-func Router() http.Handler {
+func Router(profile *usecase.ProfileService) http.Handler {
 	r := chi.NewRouter()
 
 	r.HandleFunc("/ping", func(w http.ResponseWriter, _ *http.Request) {
@@ -15,7 +18,10 @@ func Router() http.Handler {
 		w.Write([]byte("pong"))
 	})
 
-	r.Post("/auth/signup")
+	h := handlers.New(profile)
+
+	r.Post("/auth/signup", wrapper.PublicWrap(h.SignUp))
+	r.Post("/auth/login", wrapper.PublicWrap(h.Login))
 
 	return r
 }

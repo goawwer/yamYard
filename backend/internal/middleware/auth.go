@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type Config struct {
 	JWTSecret string `env:"jwt_secret"`
 }
@@ -35,9 +34,9 @@ func GenerateToken(userId uuid.UUID) (string, error) {
 
 func SetAuthCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
-		Name: "token",
-		Value: token,
+		Name:     "token",
+		Value:    token,
 		HttpOnly: true,
-		Path: "/",
+		Path:     "/",
 	})
 }

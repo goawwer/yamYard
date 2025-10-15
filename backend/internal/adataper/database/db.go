@@ -42,6 +42,10 @@ func Init(ctx context.Context, c *Config) error {
 	return nil
 }
 
+func Get() *Db {
+	return database
+}
+
 func Close() error {
 	return database.Close()
 }
