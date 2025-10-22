@@ -13,6 +13,7 @@ import (
 	"github.com/goawwer/yamyard/internal/adataper/database"
 	repo "github.com/goawwer/yamyard/internal/adataper/database/profile"
 	"github.com/goawwer/yamyard/internal/controller"
+	"github.com/goawwer/yamyard/internal/middleware"
 	"github.com/goawwer/yamyard/internal/usecase/profile"
 	"github.com/goawwer/yamyard/pkg/logger"
 	"github.com/goawwer/yamyard/pkg/server"
@@ -32,6 +33,8 @@ func Start(ctx context.Context, cfg *config.Config) {
 	profileRepo := repo.NewProfileRepository(database.Get())
 
 	profileUsecase := profile.NewProfileService(profileRepo)
+
+	middleware.InitAuthConfig(cfg.JWT.Secret)
 
 	r := controller.Router(profileUsecase)
 

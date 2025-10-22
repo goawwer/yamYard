@@ -1,6 +1,8 @@
 package handlers
 
-import "github.com/goawwer/yamyard/internal/usecase/profile"
+import (
+	"github.com/goawwer/yamyard/internal/usecase/profile"
+)
 
 type Handlers struct {
 	profile *profile.ProfileService
