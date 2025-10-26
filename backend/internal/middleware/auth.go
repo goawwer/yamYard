@@ -42,7 +42,7 @@ type CustomClaims struct {
 
 type contextKey string
 
-const claimsKey contextKey = "claims"
+const ClaimsKey contextKey = "claims"
 
 func GenerateTokenPair(userID uuid.UUID) (*TokenPair, error) {
 	now := time.Now()
@@ -124,12 +124,16 @@ func Middleware(next http.Handler) http.Handler {
 
 		claims, err := ParseToken(cookie.Value)
 		if err != nil {
-			logger.Error("failed to parse token: ", err)
+			if errors.Is(err, ErrExpiredToken) {
+				logger.Info("access token expired for user:", claims.UserID)
+			} else {
+				logger.Error("invalid access token:", err)
+			}
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), claimsKey, claims)
+		ctx := context.WithValue(r.Context(), ClaimsKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

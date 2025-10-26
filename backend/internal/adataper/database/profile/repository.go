@@ -42,12 +42,28 @@ func (p *ProfileRepository) GetUserByEmail(ctx context.Context, email string) (d
 	return output, err
 }
 
-func (p *ProfileRepository) GetUserById(ctx context.Context, userId int) error {
+func (p *ProfileRepository) GetUserById(ctx context.Context, userId uuid.UUID) (*domain.User, error) {
+	var user domain.User
+
 	query := `
-		SELECT * FROM users
-		WHERE id = $1
-	`
-	return p.r.QueryRowContext(ctx, query, userId).Scan(&userId)
+        SELECT id, username, email, hashed_password, created_at, updated_at, profile_status, bio, is_admin
+        FROM users
+        WHERE id = $1
+    `
+
+	err := p.r.QueryRowContext(ctx, query, userId).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.HashedPassword,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.ProfileStatus,
+		&user.Bio,
+		&user.IsAdmin,
+	)
+
+	return &user, err
 }
 
 func (p *ProfileRepository) ExistsByID(ctx context.Context, id uuid.UUID) (bool, error) {

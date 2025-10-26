@@ -58,3 +58,7 @@ func (p *ProfileService) Exists(ctx context.Context, userId uuid.UUID) (bool, er
 
 	return output, nil
 }
+
+func (p *ProfileService) GetCurrentUser(ctx context.Context, userId uuid.UUID) (*domain.User, error) {
+	return p.repo.GetUserById(ctx, userId)
+}

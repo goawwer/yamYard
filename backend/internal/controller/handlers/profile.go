@@ -124,3 +124,17 @@ func (h *Handlers) Refresh(w *wrapper.Wrapper) error {
 func (h *Handlers) Check(_ *wrapper.Wrapper, _ *middleware.CustomClaims) (any, error) {
 	return nil, nil
 }
+
+func (h *Handlers) GetCurrentUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
+	u, err := h.profile.GetCurrentUser(w.Request().Context(), c.UserID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			logger.Error("failed to get user, no found: ", err)
+			return nil, wrapper.NewError(http.StatusBadRequest, "user not found")
+		}
+
+		return nil, err
+	}
+
+	return &u, nil
+}

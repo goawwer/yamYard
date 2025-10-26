@@ -25,10 +25,14 @@ func Router(profile *usecase.ProfileService) http.Handler {
 	r.Post("/auth/login", wrapper.PublicWrap(h.Login))
 	r.Post("/refresh", wrapper.PublicWrap(h.Refresh))
 
-	r.Route("/api", func(usersRouter chi.Router) {
-		usersRouter.Use(jwt.Middleware)
-		usersRouter.Post("/logout", wrapper.AuthWrap(h.Logout))
-		usersRouter.Get("/check", wrapper.AuthWrap(h.Check))
+	r.Route("/api", func(r chi.Router) {
+		r.Use(jwt.Middleware)
+		r.Post("/logout", wrapper.AuthWrap(h.Logout))
+		r.Get("/check", wrapper.AuthWrap(h.Check))
+
+		r.Route("/users", func(usersRouter chi.Router) {
+			usersRouter.Get("/me", wrapper.AuthWrap(h.GetCurrentUser))
+		})
 	})
 
 	return r

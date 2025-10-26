@@ -10,6 +10,7 @@ import (
 type ProfileRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetUserByEmail(ctx context.Context, email string) (domain.UserEntity, error)
+	GetUserById(ctx context.Context, userId uuid.UUID) (*domain.User, error)
 	ExistsByID(ctx context.Context, id uuid.UUID) (bool, error)
 }
 

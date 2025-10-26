@@ -40,7 +40,7 @@ func (w *Wrapper) Query(key string) string {
 }
 
 func (w *Wrapper) claims() (*middleware.CustomClaims, error) {
-	claims, ok := w.r.Context().Value("claims").(*middleware.CustomClaims)
+	claims, ok := w.r.Context().Value(middleware.ClaimsKey).(*middleware.CustomClaims)
 	if !ok {
 		return nil, errors.New("missing claims")
 	}

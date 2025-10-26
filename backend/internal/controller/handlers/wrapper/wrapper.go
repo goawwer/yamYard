@@ -44,10 +44,7 @@ func AuthWrap(handler AuthHandler) http.HandlerFunc {
 		claims, err := wrapper.claims()
 		if err != nil {
 			logger.Error("failed to get claims: ", err)
-			NewError(
-				http.StatusBadRequest,
-				"missing claims",
-			)
+			wrapper.Error(NewError(http.StatusUnauthorized, "invalid or missing token"))
 			return
 		}
 
