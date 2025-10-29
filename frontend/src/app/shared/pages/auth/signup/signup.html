@@ -1,0 +1,55 @@
+<form class="signup-form" [formGroup]="signupForm" (ngSubmit)="signUp()">
+    <h1>Регистрация</h1>
+
+    <mat-form-field>
+        <mat-label>Имя пользователя</mat-label>
+        <input matInput formControlName="username" />
+        @if (signupForm.get('username')?.hasError('required') && signupForm.get('username')?.touched) {
+        <mat-error>
+            Имя пользователя обязательно
+        </mat-error>
+        }
+
+        @if (signupForm.get('username')?.hasError('minlength')) {
+        <mat-error>
+            Имя пользотваеля должно иметь минимум 5 символов
+        </mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Почта</mat-label>
+        <input matInput formControlName="email" />
+        @if (signupForm.get('email')?.hasError('email')) {
+        <mat-error>
+            Некорректная почта
+        </mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Пароль</mat-label>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" />
+        <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (signupForm.get('password')?.hasError('minlength')) {
+        <mat-error>
+            Пароль должен быть минимум 8 символов
+        </mat-error>
+        }
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>О себе</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid || isSubmitted">
+        Зарегистрироваться
+    </button>
+
+    <p>Уже есть аккаут?
+        <a [routerLink]="['/login']">Войти</a>
+    </p>
+</form>

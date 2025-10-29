@@ -1,0 +1,51 @@
+<form class="login-form" [formGroup]="loginForm" (ngSubmit)="signIn()">
+    <h1>Логин</h1>
+    @for (field of fields; track field.key) {
+
+    <mat-form-field>
+        @let hidePassword = hide();
+        <mat-label>{{ field.label }}</mat-label>
+        @if (field.key === "password") {
+        <input matInput [formControlName]="field.key" [type]="hidePassword ? 'password' : 'text'" />
+        } @if (field.key === "password") {
+        <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        } @else {
+        <input matInput [formControlName]="field.key">
+        }
+
+        @let control = loginForm.get(field.key);
+
+        @if(control?.hasError('required') && control?.touched) {
+        <mat-error>
+            Это поле обязательно
+        </mat-error>
+        }
+        @if(field.key === 'login' && control?.hasError('minlength') && control?.touched) {
+        <mat-error>
+            Логин должен быть минимум 5 символов
+        </mat-error>
+        }
+        @if(field.key === 'password' && control?.hasError('minlength') && control?.touched) {
+        <mat-error>
+            Пароль должен иметь минимум 8 символов
+        </mat-error>
+        }
+
+    </mat-form-field>
+    }
+
+    <button class="btn-primary" type="submit" [disabled]="loginForm.invalid || isSubmitted">
+        Войти
+    </button>
+
+    <div>
+        <p>Нет аккаунта?
+            <a [routerLink]="['/auth', 'register']">
+                Зарегистрироваться
+            </a>
+        </p>
+    </div>
+</form>

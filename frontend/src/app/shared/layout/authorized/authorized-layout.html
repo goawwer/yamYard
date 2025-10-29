@@ -1,0 +1,23 @@
+<div class="layout">
+    <nav class="navbar">
+        @if (isProfilePage()) {
+        <a [routerLink]="['/feed']">
+            <mat-icon>arrow_back_ios_new</mat-icon>
+        </a>
+        } @else {
+        <a [routerLink]="['/feed']" class="navbar__logo">yamYard</a>
+        }
+
+        <a [routerLink]="['/me']">
+            <mat-icon class="profile-icon">account_circle</mat-icon>
+        </a>
+    </nav>
+
+    <main class="layout__content">
+        <router-outlet></router-outlet>
+    </main>
+
+    <footer class="footer">
+        <p>© {{ currentYear }} Сельков Вадим АИС-22-1</p>
+    </footer>
+</div>

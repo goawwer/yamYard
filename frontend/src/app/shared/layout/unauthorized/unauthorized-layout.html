@@ -1,0 +1,17 @@
+<div class="layout">
+    <nav class="navbar">
+        <a [routerLink]="['/home']" class="navbar__logo">yamYard</a>
+
+        <ul class="navbar__menu">
+            <li><a [routerLink]="['/auth', 'login']">Войти</a></li>
+        </ul>
+    </nav>
+
+    <main class="layout__content">
+        <router-outlet></router-outlet>
+    </main>
+
+    <footer class="footer">
+        <p>© {{ currentYear }} Сельков Вадим АИС-22-1</p>
+    </footer>
+</div>

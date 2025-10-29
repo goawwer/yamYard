@@ -1,0 +1,27 @@
+<div class="profile-page">
+    <mat-card class="profile-card">
+        <div class="profile-header">
+            <div class="avatar">
+                <mat-icon>account_circle</mat-icon>
+            </div>
+
+            @if (user$ | async; as user) {
+            <div class="user-info">
+                <h2>{{ user.username }}</h2>
+                <p class="status">{{ user.profileStatus || 'No status yet' }}</p>
+                <p class="bio">{{ user.bio || 'No bio provided' }}</p>
+
+                <button mat-raised-button color="primary">Edit Profile</button>
+            </div>
+            }
+
+        </div>
+    </mat-card>
+
+    <mat-divider></mat-divider>
+
+    <section class="posts-section">
+        <h3>Posts</h3>
+        <p>Coming soon...</p>
+    </section>
+</div>

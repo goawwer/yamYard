@@ -1,0 +1,31 @@
+<section class="hero">
+    <div class="hero__content">
+        <div class="hero__text">
+            <h1>Добро пожаловать</h1>
+            <p>
+                Находи и делись домашними рецептами со всеми!
+                От простых перекусов до серьезных семейных традиций - для всего найдется место.
+            </p>
+            <div class="hero__actions">
+                <button class="btn-primary" [routerLink]="['/auth', 'register']">Присоединиться</button>
+                <button class="btn-secondary" routerLink="#">Ознакомиться</button>
+            </div>
+        </div>
+
+        <div class="hero__image">
+            <img src="/main.jpg" alt="Cooking together" />
+        </div>
+    </div>
+</section>
+
+<section class="preview">
+    <h2>Recent Recipes</h2>
+    <div class="preview__grid">
+        <div class="preview__card">
+            @for (recipe of demoRecipes; track recipe.title) {
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,77 @@
+<!-- feed.html -->
+<div class="create-post-wrapper">
+    <button class="create-post-btn" (click)="toggleCreateForm()">
+        <mat-icon>add</mat-icon>
+        <span>Create Recipe</span>
+    </button>
+</div>
+
+<section class="feed">
+    <h1 class="feed__title">Latest Recipes</h1>
+
+    <div class="feed__grid">
+        @if (recipes$ | async; as recipes) {
+        @for (recipe of recipes; track recipe.id) {
+        <mat-card class="feed__card" [routerLink]="['/recipe', recipe.id]">
+            <mat-card-header>
+                <mat-icon>person</mat-icon>
+                <span>{{ recipe.authorUsername }}</span>
+            </mat-card-header>
+            <mat-card-content>
+                <h2>{{ recipe.title }}</h2>
+                <p class="feed__meta">
+                    by {{ recipe.authorUsername }} · {{ recipe.createdAt | date:'short' }}
+                </p>
+                <p>{{ recipe.description }}</p>
+            </mat-card-content>
+        </mat-card>
+        }
+        } @else {
+        <p>Loading recipes...</p>
+        }
+    </div>
+</section>
+
+<!-- Overlay for creating recipe -->
+@if (isCreating()) {
+<div class="overlay">
+    <div class="create-form-card">
+        <h2>Create Recipe</h2>
+        <form [formGroup]="recipeForm" (ngSubmit)="createRecipe()">
+            <mat-form-field appearance="outline">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" required />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Ingredients (comma-separated)</mat-label>
+                <input matInput formControlName="ingredients" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Cooking Time (min)</mat-label>
+                <input matInput type="number" formControlName="cookingTime" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Difficulty</mat-label>
+                <mat-select formControlName="difficulty">
+                    <mat-option value="Easy">Easy</mat-option>
+                    <mat-option value="Medium">Medium</mat-option>
+                    <mat-option value="Hard">Hard</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit">Create</button>
+                <button mat-button type="button" (click)="toggleCreateForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+}

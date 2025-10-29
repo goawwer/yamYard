@@ -1,0 +1,39 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+
+    &__logo {
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: #333;
+    }
+}
+
+.layout__content {
+    flex: 1;
+    padding: 2rem;
+    background-color: #fafafa;
+}
+
+.footer {
+    padding: 1rem;
+    text-align: center;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 0.9rem;
+}
+
+.profile-icon {
+    transform: scale(2);
+}
