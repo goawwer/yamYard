@@ -121,8 +121,8 @@ func (h *Handlers) Refresh(w *wrapper.Wrapper) error {
 	return nil
 }
 
-func (h *Handlers) Check(_ *wrapper.Wrapper, _ *middleware.CustomClaims) (any, error) {
-	return nil, nil
+func (h *Handlers) Check(_ *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
+	return c.UserID, nil
 }
 
 func (h *Handlers) GetCurrentUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {

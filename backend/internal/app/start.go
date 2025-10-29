@@ -11,10 +11,12 @@ import (
 
 	"github.com/goawwer/yamyard/config"
 	"github.com/goawwer/yamyard/internal/adataper/database"
-	repo "github.com/goawwer/yamyard/internal/adataper/database/profile"
+	ProfileRepo "github.com/goawwer/yamyard/internal/adataper/database/profile"
+	RecipeRepo "github.com/goawwer/yamyard/internal/adataper/database/recipe"
 	"github.com/goawwer/yamyard/internal/controller"
 	"github.com/goawwer/yamyard/internal/middleware"
-	"github.com/goawwer/yamyard/internal/usecase/profile"
+	profileService "github.com/goawwer/yamyard/internal/usecase/profile"
+	recipeService "github.com/goawwer/yamyard/internal/usecase/recipe"
 	"github.com/goawwer/yamyard/pkg/logger"
 	"github.com/goawwer/yamyard/pkg/server"
 )
@@ -30,13 +32,17 @@ func Start(ctx context.Context, cfg *config.Config) {
 		}
 	}()
 
-	profileRepo := repo.NewProfileRepository(database.Get())
+	profileRepo := ProfileRepo.NewProfileRepository(database.Get())
 
-	profileUsecase := profile.NewProfileService(profileRepo)
+	profileUsecase := profileService.NewProfileService(profileRepo)
+
+	recipeRepo := RecipeRepo.NewRecipeRepository(database.Get())
+
+	recipeUsecase := recipeService.NewRecipeService(recipeRepo)
 
 	middleware.InitAuthConfig(cfg.JWT.Secret)
 
-	r := controller.Router(profileUsecase)
+	r := controller.Router(profileUsecase, recipeUsecase)
 
 	httpServer := server.New(r, &cfg.Server)
 
