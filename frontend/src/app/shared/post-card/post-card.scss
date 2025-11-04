@@ -1,0 +1,185 @@
+$color-text-main: #1a1a1a;
+$color-text-muted: #666;
+$color-accent: #1976d2;
+$border-radius: 15px;
+$shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+/* ── CARD ────────────────────────────────────────────────────── */
+.feed-card {
+    border-radius: $border-radius;
+    overflow: hidden;
+    box-shadow: $shadow-card;
+    transition: all 0.2s ease;
+    contain: layout style paint;
+    /* Performance boost */
+}
+
+/* ── AUTHOR HEADER ───────────────────────────────────────────── */
+.author-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: .5rem;
+
+    a {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+
+}
+
+.author-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.post-date {
+    font-size: 0.85rem;
+    color: $color-text-muted;
+}
+
+.author-avatar {
+    .avatar-img {
+        margin-top: 0.4rem;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+}
+
+/* ── IMAGE ───────────────────────────────────────────────────── */
+mat-card-image {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    background: #f0f0f0;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: translateX(-100%);
+        animation: shimmer 1.8s infinite;
+    }
+}
+
+mat-card-image[src],
+mat-card-image[ngSrc] {
+    &::before {
+        display: none;
+    }
+
+    background: none;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ── CARD CONTENT ────────────────────────────────────────────── */
+.card-content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .post-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+}
+
+/* ── DESCRIPTION CONTAINER (with button inside) ─────────────── */
+.description-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &.expanded {
+        .post-description {
+            display: block;
+        }
+    }
+}
+
+.post-description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+
+    &.truncated {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        -webkit-line-clamp: 2;
+        /* 2 lines by default */
+    }
+}
+
+.expand-btn {
+    align-self: flex-start;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    min-width: auto;
+    height: auto;
+}
+
+/* ── RECIPE META (ALWAYS VISIBLE) ───────────────────────────── */
+.recipe-meta {
+    display: flex;
+    white-space: nowrap;
+    gap: .75rem;
+    margin-top: .5rem;
+    font-size: .85rem;
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &.ingredients {
+            flex: 1 1 100%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        mat-icon {
+            transform: scale(1.4);
+        }
+    }
+}
+
+/* ── CARD ACTIONS ────────────────────────────────────────────── */
+.card-actions {
+    padding: 0 1.25rem 1rem;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+
+    .post-date-footer {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: $color-text-muted;
+    }
+}

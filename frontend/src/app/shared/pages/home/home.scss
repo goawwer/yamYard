@@ -1,5 +1,4 @@
 .hero {
-    background: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,12 +17,10 @@
 
         h1 {
             font-size: 3rem;
-            color: #333;
             margin-bottom: 2rem;
         }
 
         p {
-            color: #555;
             font-size: 1.1rem;
             line-height: 1.6;
             max-width: 500px;
@@ -50,7 +47,7 @@
 }
 
 .preview {
-    background: #fafafa;
+    background-color: #ece1d1;
     padding: 4rem 2rem;
     text-align: center;
 
@@ -68,7 +65,6 @@
     }
 
     &__card {
-        background: #fff;
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -87,12 +83,10 @@
 
         h3 {
             margin-top: 0.75rem;
-            color: #333;
         }
 
         p {
             font-size: 0.9rem;
-            color: #666;
             margin-top: 0.5rem;
         }
     }

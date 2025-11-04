@@ -1,8 +1,10 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpContextToken } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../store/auth/auth.service';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { baseURL } from '../../../environments/environment';
+
+export const skipJsonContentType = new HttpContextToken<boolean>(() => false);
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
@@ -10,7 +12,7 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     if (req.url.startsWith('/assets/')) return next(req);
 
     const apiReq = req.clone({
-        headers: req.headers.set('Content-Type', 'application/json'),
+        headers: req.context.get(skipJsonContentType) ? req.headers : req.headers.set('Content-Type', 'application/json'),
         url: `${baseURL}${req.url}`,
         withCredentials: true
     });

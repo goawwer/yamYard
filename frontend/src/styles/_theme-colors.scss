@@ -5,16 +5,16 @@
 @use '@angular/material' as mat;
 
 // Note: Color palettes are generated from primary: #f8320b, secondary: #8b3a2b, tertiary: #ffb74d, neutral: #fef2e2, neutral variant: #fef2e2, error: #c1121f
-$_palettes: (
+$palettes: (
     primary: (0: #000000,
         10: #3e0400,
         20: #650b00,
         25: #791000,
         30: #8e1400,
         35: #a31900,
-        40: #b91e00,
+        40: #f8320b,
         50: #e72800,
-        60: #ff5636,
+        60: #b91e00,
         70: #ff8a72,
         80: #ffb4a5,
         90: #ffdad3,
@@ -95,7 +95,7 @@ $_palettes: (
         60: #998f82,
         70: #b4aa9b,
         80: #d0c5b6,
-        90: #ece1d1,
+        90: #ffffff,
         95: #fbefdf,
         98: #fff8f2,
         99: #fffbff,
@@ -107,7 +107,7 @@ $_palettes: (
         25: #7d000d,
         30: #930011,
         35: #a90015,
-        40: #bd0d1d,
+        40: #f8320b,
         50: #e22f32,
         60: #ff544f,
         70: #ff8980,
@@ -120,12 +120,12 @@ $_palettes: (
     ),
 );
 
-$_rest: (
-    secondary: map.get($_palettes, secondary),
-    neutral: map.get($_palettes, neutral),
-    neutral-variant: map.get($_palettes, neutral-variant),
-    error: map.get($_palettes, error),
+$rest: (
+    secondary: map.get($palettes, secondary),
+    neutral: map.get($palettes, neutral),
+    neutral-variant: map.get($palettes, neutral-variant),
+    error: map.get($palettes, error),
 );
 
-$primary-palette: map.merge(map.get($_palettes, primary), $_rest);
-$tertiary-palette: map.merge(map.get($_palettes, tertiary), $_rest);
+$primary-palette: map.merge(map.get($palettes, primary), $rest);
+$tertiary-palette: map.merge(map.get($palettes, tertiary), $rest);

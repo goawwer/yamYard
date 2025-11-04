@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { FormGroup, Validators } from '@angular/forms';
 import { AUTHCOMPONENTS } from '../auth.imports';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/store/auth/auth.service';
 
 @Component({
     selector: 'app-signup',
@@ -14,7 +16,10 @@ export class SignupComponent implements OnInit {
     isSubmitted = false;
     hidePassword = true;
 
-    constructor() {
+    constructor(
+        private service: AuthService,
+        private router: Router
+    ) {
     }
 
     ngOnInit() {
@@ -34,9 +39,15 @@ export class SignupComponent implements OnInit {
         if (this.signupForm.invalid) return;
         this.isSubmitted = true;
 
-        const user = this.signupForm.value;
-        console.log('Registering user:', user);
+        this.service.signUp(this.signupForm.value).subscribe({
+            next: () => {
+                this.router.navigate(['/login']);
+            },
+            error: (err) => {
+                alert(`Login failed: ${err.message}`);
+                this.isSubmitted = false;
+            }
+        })
 
-        // TODO: call API endpoint
     }
 }

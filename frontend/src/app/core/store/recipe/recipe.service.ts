@@ -1,11 +1,12 @@
 import { Injectable } from "@angular/core";
 import { RecipeStore } from "./recipe.store";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { UrlQueryService } from "../../../helpers/url/query.service";
 import { Sort } from "@angular/material/sort";
-import { Recipe } from "./recipe.model";
+import { isUpdatingRecipe, Recipe } from "./recipe.model";
 import { catchError, finalize, Observable, tap, throwError } from "rxjs";
+import { skipJsonContentType } from "../../interceptors/api.interceptor";
 
 @Injectable({
     providedIn: 'root'
@@ -46,9 +47,19 @@ export class RecipeService {
         )
     }
 
-    postRecipe(recipe: Recipe): Observable<Recipe> {
+    postRecipe(recipe: Recipe, file?: File): Observable<Recipe> {
         this.store.setLoading(true);
-        return this.http.post<Recipe>(`${this.getAllRecipeURL}/create`, recipe).pipe(
+
+        const formData = new FormData();
+        if (file) formData.append('recipe', file);
+
+        Object.entries(recipe).forEach(([key, value]) => {
+            if (value != null) formData.append(key, value.toString());
+        });
+
+        return this.http.post<Recipe>(`${this.getAllRecipeURL}/create`, formData, {
+            context: new HttpContext().set(skipJsonContentType, true)
+        }).pipe(
             tap(created => this.store.add(created)),
             catchError((err) => {
                 return throwError(() => new Error(err.error?.error) || 'failed to create recipe');
@@ -57,9 +68,21 @@ export class RecipeService {
         );
     }
 
-    updateRecipe(id: string, recipe: Recipe): Observable<Recipe> {
+    updateRecipe(id: string, recipe: Partial<isUpdatingRecipe>, file?: File): Observable<Recipe> {
         this.store.setLoading(true);
-        return this.http.put<Recipe>(`${this.getAllRecipeURL}/${id}/update`, recipe).pipe(
+
+        this.store.setLoading(true);
+
+        const formData = new FormData();
+        if (file) formData.append('recipe', file);
+
+        Object.entries(recipe).forEach(([key, value]) => {
+            if (value != null) formData.append(key, value.toString());
+        });
+
+        return this.http.put<Recipe>(`${this.getAllRecipeURL}/${id}/update`, formData, {
+            context: new HttpContext().set(skipJsonContentType, true)
+        }).pipe(
             tap(updated => this.store.update(updated)),
             catchError((err) => {
                 return throwError(() => new Error(err.error?.error) || 'failed to update recipe');

@@ -12,6 +12,7 @@ type ProfileRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (domain.UserEntity, error)
 	GetUserById(ctx context.Context, userId uuid.UUID) (*domain.User, error)
 	ExistsByID(ctx context.Context, id uuid.UUID) (bool, error)
+	Update(ctx context.Context, newUser *domain.User) (*domain.User, error)
 }
 
 type ProfileService struct {

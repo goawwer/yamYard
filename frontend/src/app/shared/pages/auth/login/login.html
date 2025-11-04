@@ -2,7 +2,7 @@
     <h1>Логин</h1>
     @for (field of fields; track field.key) {
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
         @let hidePassword = hide();
         <mat-label>{{ field.label }}</mat-label>
         @if (field.key === "password") {
@@ -23,9 +23,9 @@
             Это поле обязательно
         </mat-error>
         }
-        @if(field.key === 'login' && control?.hasError('minlength') && control?.touched) {
+        @if(field.key === 'email' && control?.hasError('email') && control?.touched) {
         <mat-error>
-            Логин должен быть минимум 5 символов
+            Некорректная почта
         </mat-error>
         }
         @if(field.key === 'password' && control?.hasError('minlength') && control?.touched) {

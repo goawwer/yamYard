@@ -4,13 +4,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/goawwer/yamyard/internal/controller/handlers/wrapper"
 	"github.com/goawwer/yamyard/internal/dto"
 	"github.com/goawwer/yamyard/internal/middleware"
 	"github.com/goawwer/yamyard/pkg/logger"
+	"github.com/google/uuid"
 )
 
 func (h *Handlers) SignUp(w *wrapper.Wrapper) error {
@@ -126,7 +132,7 @@ func (h *Handlers) Check(_ *wrapper.Wrapper, c *middleware.CustomClaims) (any, e
 }
 
 func (h *Handlers) GetCurrentUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
-	u, err := h.profile.GetCurrentUser(w.Request().Context(), c.UserID)
+	u, err := h.profile.GetUser(w.Request().Context(), c.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			logger.Error("failed to get user, no found: ", err)
@@ -137,4 +143,63 @@ func (h *Handlers) GetCurrentUser(w *wrapper.Wrapper, c *middleware.CustomClaims
 	}
 
 	return &u, nil
+}
+
+func (h *Handlers) GetUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
+	idStr := chi.URLParam(w.Request(), "id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return nil, wrapper.NewError(http.StatusBadRequest, "invalid UUID format")
+	}
+
+	u, err := h.profile.GetUser(w.Request().Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			logger.Error("failed to get user, no found: ", err)
+			return nil, wrapper.NewError(http.StatusBadRequest, "user not found")
+		}
+
+		return nil, err
+	}
+
+	return &u, nil
+}
+
+func (h *Handlers) UpdateUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
+	file, header, err := w.Request().FormFile("avatar")
+	if err != nil {
+		return nil, wrapper.NewError(http.StatusBadRequest, "failed to read file with avatar")
+	}
+	defer file.Close()
+
+	os.MkdirAll("uploads/avatars", os.ModePerm)
+
+	filename := fmt.Sprintf("%s-%d%s",
+		c.UserID.String(),
+		time.Now().Unix(),
+		filepath.Ext(header.Filename),
+	)
+
+	path := filepath.Join("uploads/avatars", filename)
+	dst, err := os.Create(path)
+	if err != nil {
+		return nil, err
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, file)
+	if err != nil {
+		return nil, err
+	}
+
+	imageURL := "/uploads/avatars/" + filename
+
+	// Save to DB
+	u, err := h.profile.UpdateUser(w.Request().Context(), c.UserID, imageURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }

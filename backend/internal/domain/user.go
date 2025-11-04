@@ -12,6 +12,7 @@ type User struct {
 	Username       string    `db:"username" json:"username"`
 	HashedPassword string    `db:"hashed_password" json:"password"`
 	Bio            *string   `db:"bio" json:"bio"`
+	ImageURL       *string   `db:"image_url" json:"image_url"`
 	ProfileStatus  *string   `db:"profile_status" json:"profile_status"`
 	IsAdmin        bool      `db:"is_admin" json:"is_admin"`
 	CreatedAt      time.Time `db:"created_at" json:"created_at"`

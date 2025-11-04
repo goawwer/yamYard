@@ -1,27 +1,199 @@
-<div class="profile-page">
-    <mat-card class="profile-card">
-        <div class="profile-header">
-            <div class="avatar">
-                <mat-icon>account_circle</mat-icon>
+<!-- ── PROFILE HEADER (unchanged) ─────────────────────────────────────── -->
+<div class="profile-header">
+    @if (user$ | async; as user) {
+    <div class="avatar">
+        @if (user.image_url) {
+        <img [src]="user.image_url" alt="Avatar" />
+        } @else {
+        <mat-icon class="alt-avatar">account_circle</mat-icon>
+        }
+    </div>
+
+    <div class="user-info">
+        <h2>{{ user.username }}</h2>
+        @if (user.profileStatus) {
+        <p class="status">{{ user.profileStatus }}</p>
+        }
+        @if (user.bio) {
+        <p class="bio">{{ user.bio }}</p>
+        }
+        <button mat-icon-button color="primary" (click)="toggleUpdateForm()" class="settings-btn">
+            <mat-icon>settings</mat-icon>
+        </button>
+    </div>
+    }
+</div>
+
+<mat-divider></mat-divider>
+
+<!-- ── TABS (unchanged) ─────────────────────────────────────────────────── -->
+<mat-tab-group>
+    <mat-tab label="Посты">
+        <section class="posts-section">
+            @if (recipes$ | async; as recipes) {
+            @if (recipes.length > 0) {
+            <div class="profile-feed-container">
+                @for (recipe of recipes; track recipe.id) {
+                <app-post-card [recipe]="recipe" [currentAvatarUrl]="currentAvatarUrl()" [canManage]="true"
+                    (edit)="openRecipeEdit(recipe)" (delete)="deleteRecipe(recipe)" (like)="toggleLike(recipe.id)">
+                </app-post-card>
+                }
             </div>
-
-            @if (user$ | async; as user) {
-            <div class="user-info">
-                <h2>{{ user.username }}</h2>
-                <p class="status">{{ user.profileStatus || 'No status yet' }}</p>
-                <p class="bio">{{ user.bio || 'No bio provided' }}</p>
-
-                <button mat-raised-button color="primary">Edit Profile</button>
+            } @else {
+            <div class="empty-state">
+                <mat-icon class="empty-icon">restaurant_menu</mat-icon>
+                <h3>Пока нет постов</h3>
+                <p>Поделитесь своим первым рецептом!</p>
             </div>
             }
+            } @else {
+            <div class="loading-state">
+                <p>Загружаем посты...</p>
+            </div>
+            }
+        </section>
+    </mat-tab>
+    <mat-tab label="Понравившиеся"></mat-tab>
+</mat-tab-group>
 
-        </div>
-    </mat-card>
 
-    <mat-divider></mat-divider>
+<!-- ── EDIT MODAL ─────────────────────────────────────────────────────── -->
+@if (isUpdating()) {
+<div class="overlay" (click)="onOverlayClick($event)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+            <h2>Редактирование профиля</h2>
+            <button mat-icon-button (click)="toggleUpdateForm()" class="close-btn">
+                <mat-icon>close</mat-icon>
+            </button>
+        </header>
 
-    <section class="posts-section">
-        <h3>Posts</h3>
-        <p>Coming soon...</p>
-    </section>
+        <form [formGroup]="editForm" (ngSubmit)="editProfile()" class="modal-form">
+
+            <!-- ── AVATAR PREVIEW + UPLOAD ─────────────────────────────────── -->
+            <div class="avatar-section">
+                <div class="avatar-preview">
+                    @if (previewUrl(); as url) {
+                    <img [src]="url" alt="Preview" />
+                    } @else if (currentAvatarUrl(); as current) {
+                    <img [src]="current" alt="Current avatar" />
+                    } @else {
+                    <mat-icon class="placeholder">account_circle</mat-icon>
+                    }
+                </div>
+
+                <button mat-stroked-button type="button" (click)="fileInput.click()" class="upload-btn">
+                    <mat-icon>photo_camera</mat-icon>
+                    <span>Изменить фотографию</span>
+                </button>
+
+                <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
+            </div>
+
+            <!-- ── TEXT FIELDS ─────────────────────────────────────────────── -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Имя пользователя</mat-label>
+                <input matInput formControlName="username" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Статус</mat-label>
+                <input matInput formControlName="profileStatus" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Описание</mat-label>
+                <textarea matInput rows="3" formControlName="bio"></textarea>
+            </mat-form-field>
+
+            <!-- ── ACTION BUTTONS ──────────────────────────────────────────── -->
+            <div class="modal-actions">
+                <button mat-button type="button" (click)="toggleUpdateForm()" class="cancel-btn">
+                    Отменить
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="editForm.invalid">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+}
+
+
+<!-- ── EDIT RECIPE MODAL ─────────────────────────────────────────────── -->
+@if (isEditingRecipe()) {
+<div class="overlay" (click)="onOverlayClick($event)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+            <h2>Редактирование рецепта</h2>
+            <button mat-icon-button (click)="closeRecipeEdit()" class="close-btn">
+                <mat-icon>close</mat-icon>
+            </button>
+        </header>
+
+        <form [formGroup]="recipeEditForm" (ngSubmit)="updateRecipe()" class="modal-form">
+
+            <!-- ── RECIPE IMAGE PREVIEW + UPLOAD ─────────────────────────── -->
+            <div class="avatar-section">
+                <div class="avatar-preview">
+                    @if (recipePreviewUrl(); as url) {
+                    <img [src]="url" alt="Preview" />
+                    } @else if (currentRecipeImage(); as current) {
+                    <img [src]="current" alt="Current image" />
+                    } @else {
+                    <mat-icon class="placeholder">image</mat-icon>
+                    }
+                </div>
+
+                <button mat-stroked-button type="button" (click)="recipeFileInput.click()" class="upload-btn">
+                    <mat-icon>photo_camera</mat-icon>
+                    <span>Изменить фото</span>
+                </button>
+
+                <input #recipeFileInput type="file" hidden accept="image/*" (change)="onRecipeFileSelected($event)" />
+            </div>
+
+            <!-- ── RECIPE FIELDS ─────────────────────────────────────────── -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Название</mat-label>
+                <input matInput formControlName="title" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Описание</mat-label>
+                <textarea matInput rows="3" formControlName="description" required></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Ингредиенты</mat-label>
+                <input matInput placeholder="Мука, сахар, яйца..." formControlName="ingredients">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Время готовки (мин)</mat-label>
+                <input matInput type="number" formControlName="cooking_time">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Сложность</mat-label>
+                <mat-select formControlName="difficulty" required>
+                    <mat-option value="easy">Легко</mat-option>
+                    <mat-option value="medium">Средне</mat-option>
+                    <mat-option value="hard">Трудно</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- ── ACTION BUTTONS ──────────────────────────────────────── -->
+            <div class="modal-actions">
+                <button mat-button type="button" (click)="closeRecipeEdit()" class="cancel-btn">
+                    Отменить
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="recipeEditForm.invalid">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+}

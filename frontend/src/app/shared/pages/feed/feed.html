@@ -1,75 +1,119 @@
-<!-- feed.html -->
-<div class="create-post-wrapper">
-    <button class="create-post-btn" (click)="toggleCreateForm()">
+<!-- ── HEADER: SEARCH + SORT + FAB ────────────────────────────────── -->
+<header class="feed-header">
+    <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Поиск по названию</mat-label>
+        <input matInput [formControl]="searchCtrl" placeholder="Пицца, суп..." (keydown.enter)="searchInput.blur()"
+            #searchInput placeholder="Пицца, суп...">
+        <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="sort-field">
+        <mat-label>Сортировать</mat-label>
+        <mat-select (selectionChange)="onSortChange($event.value)">
+            <mat-option value="">По умолчанию</mat-option>
+            <mat-option value="newest">Новее</mat-option>
+            <mat-option value="oldest">Старше</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <button mat-fab class="fab-create" (click)="toggleCreateForm()">
         <mat-icon>add</mat-icon>
-        <span>Create Recipe</span>
     </button>
-</div>
+</header>
 
-<section class="feed">
-    <h1 class="feed__title">Latest Recipes</h1>
-
-    <div class="feed__grid">
-        @if (recipes$ | async; as recipes) {
-        @for (recipe of recipes; track recipe.id) {
-        <mat-card class="feed__card" [routerLink]="['/recipe', recipe.id]">
-            <mat-card-header>
-                <mat-icon>person</mat-icon>
-                <span>{{ recipe.authorUsername }}</span>
-            </mat-card-header>
-            <mat-card-content>
-                <h2>{{ recipe.title }}</h2>
-                <p class="feed__meta">
-                    by {{ recipe.authorUsername }} · {{ recipe.createdAt | date:'short' }}
-                </p>
-                <p>{{ recipe.description }}</p>
-            </mat-card-content>
-        </mat-card>
-        }
-        } @else {
-        <p>Loading recipes...</p>
-        }
+<!-- ── FEED: VERTICAL STACK OF MAT-CARDS (FACEBOOK STYLE) ──────────── -->
+<section class="feed-container">
+    @if (recipes$ | async; as recipes) {
+    @if (recipes.length > 0) {
+    @for (recipe of recipes; track recipe.id) {
+    <app-post-card [recipe]="recipe" [currentAvatarUrl]="currentAvatarUrl()" (like)="toggleLike(recipe.id)">
+    </app-post-card>
+    }
+    } @else {
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+        <mat-icon class="empty-icon">restaurant_menu</mat-icon>
+        <h3>Пока нет рецептов</h3>
+        <p>Будьте первым, кто поделится своим рецептом!</p>
+        <button mat-raised-button color="primary" (click)="toggleCreateForm()">
+            <mat-icon> add </mat-icon>
+            Создать рецепт
+        </button>
     </div>
+    }
+    } @else {
+    <!-- LOADING -->
+    <div class="loading-state">
+        <p>Загружаем рецепты...</p>
+    </div>
+    }
 </section>
 
-<!-- Overlay for creating recipe -->
+<!-- ── CREATE MODAL (unchanged, modern) ────────────────────────────── -->
 @if (isCreating()) {
-<div class="overlay">
-    <div class="create-form-card">
-        <h2>Create Recipe</h2>
-        <form [formGroup]="recipeForm" (ngSubmit)="createRecipe()">
-            <mat-form-field appearance="outline">
-                <mat-label>Title</mat-label>
-                <input matInput formControlName="title" required />
+<div class="overlay" (click)="toggleCreateForm()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+            <h2>Создать рецепт</h2>
+            <button mat-icon-button class="close-btn" (click)="toggleCreateForm()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </header>
+
+        <form [formGroup]="recipeForm" (ngSubmit)="createRecipe()" class="modal-form">
+            <!-- IMAGE UPLOAD -->
+            <div class="avatar-section">
+                <div class="avatar-preview">
+                    @if (previewUrl(); as url) {
+                    <img [src]="url" alt="Preview">
+                    } @else {
+                    <mat-icon class="placeholder">restaurant</mat-icon>
+                    }
+                </div>
+                <button mat-stroked-button type="button" class="upload-btn" (click)="fileInput.click()">
+                    <mat-icon>photo_camera</mat-icon>
+                    Добавить фото
+                </button>
+                <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)">
+            </div>
+
+            <!-- FIELDS -->
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Название</mat-label>
+                <input matInput formControlName="title">
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description"></textarea>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Описание</mat-label>
+                <textarea matInput rows="3" formControlName="description"></textarea>
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Ingredients (comma-separated)</mat-label>
-                <input matInput formControlName="ingredients" />
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Ингредиенты</mat-label>
+                <input matInput placeholder="Мука, сахар, яйца..." formControlName="ingredients">
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Cooking Time (min)</mat-label>
-                <input matInput type="number" formControlName="cookingTime" />
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Время готовки (мин)</mat-label>
+                <input matInput type="number" formControlName="cooking_time">
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Difficulty</mat-label>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Сложность</mat-label>
                 <mat-select formControlName="difficulty">
-                    <mat-option value="Easy">Easy</mat-option>
-                    <mat-option value="Medium">Medium</mat-option>
-                    <mat-option value="Hard">Hard</mat-option>
+                    <mat-option value="Easy">Легко</mat-option>
+                    <mat-option value="Medium">Средне</mat-option>
+                    <mat-option value="Hard">Трудно</mat-option>
                 </mat-select>
             </mat-form-field>
 
-            <div class="form-actions">
-                <button mat-raised-button color="primary" type="submit">Create</button>
-                <button mat-button type="button" (click)="toggleCreateForm()">Cancel</button>
+            <div class="modal-actions">
+                <button mat-button type="button" class="cancel-btn" (click)="toggleCreateForm()">
+                    Отмена
+                </button>
+                <button mat-raised-button color="primary" type="submit">
+                    Создать рецепт
+                </button>
             </div>
         </form>
     </div>

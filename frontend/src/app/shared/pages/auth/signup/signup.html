@@ -1,7 +1,7 @@
 <form class="signup-form" [formGroup]="signupForm" (ngSubmit)="signUp()">
     <h1>Регистрация</h1>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
         <mat-label>Имя пользователя</mat-label>
         <input matInput formControlName="username" />
         @if (signupForm.get('username')?.hasError('required') && signupForm.get('username')?.touched) {
@@ -17,7 +17,7 @@
         }
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
         <mat-label>Почта</mat-label>
         <input matInput formControlName="email" />
         @if (signupForm.get('email')?.hasError('email')) {
@@ -25,9 +25,14 @@
             Некорректная почта
         </mat-error>
         }
+        @if (signupForm.get('email')?.hasError('required') && signupForm.get('email')?.touched) {
+        <mat-error>
+            Почта обязательна
+        </mat-error>
+        }
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
         <mat-label>Пароль</mat-label>
         <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" />
         <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
@@ -38,11 +43,16 @@
             Пароль должен быть минимум 8 символов
         </mat-error>
         }
+        @if (signupForm.get('password')?.hasError('required') && signupForm.get('password')?.touched) {
+        <mat-error>
+            Пароль обязателен
+        </mat-error>
+        }
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline">
         <mat-label>О себе</mat-label>
-        <textarea matInput formControlName="description" rows="3"></textarea>
+        <textarea matInput formControlName="description" rows="5"></textarea>
     </mat-form-field>
 
     <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid || isSubmitted">
@@ -50,6 +60,6 @@
     </button>
 
     <p>Уже есть аккаут?
-        <a [routerLink]="['/login']">Войти</a>
+        <a [routerLink]="['/auth', 'login']">Войти</a>
     </p>
 </form>

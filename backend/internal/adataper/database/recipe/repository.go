@@ -72,11 +72,12 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 
 	// Base query
 	query := `
-		SELECT r.id, r.author_id, u.username, r.title, r.description, 
-		       r.ingredients, r.cooking_time, r.difficulty, r.image_url, 
-		       r.created_at, r.updated_at
-		FROM recipes r
-		JOIN users u ON r.author_id = u.id
+  		SELECT 
+   		 	r.id, r.author_id, u.username, u.image_url as author_avatar_url,
+    		r.title, r.description, r.ingredients, r.cooking_time, 
+    		r.difficulty, r.image_url, r.created_at, r.updated_at
+  		FROM recipes r
+  		JOIN users u ON r.author_id = u.id
 	`
 
 	// arguments for WHERE placeholders
@@ -84,13 +85,12 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 	where := []string{}
 
 	if input.Username != "" {
-		where = append(where, "u.username ILIKE ?")
+		where = append(where, fmt.Sprintf("u.username ILIKE $%d", len(args)+1))
 		args = append(args, "%"+input.Username+"%")
 	}
 
-	// Generic filter like ?key=value
 	if input.Key != "" && input.Value != "" {
-		where = append(where, fmt.Sprintf("r.%s ILIKE ?", input.Key))
+		where = append(where, fmt.Sprintf("r.%s ILIKE $%d", input.Key, len(args)+1))
 		args = append(args, "%"+input.Value+"%")
 	}
 
@@ -118,10 +118,12 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 	for rows.Next() {
 		var rec domain.Recipe
 		var username string
+		var authorAvatarURL *string
 		err := rows.Scan(
 			&rec.ID,
 			&rec.AuthorID,
 			&username,
+			&authorAvatarURL,
 			&rec.Title,
 			&rec.Description,
 			&rec.Ingredients,

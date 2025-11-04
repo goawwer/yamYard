@@ -1,13 +1,14 @@
-import { BehaviorSubject, catchError, finalize, map, Observable, of, switchMap, tap } from "rxjs";
+import { BehaviorSubject, catchError, finalize, map, Observable, of, switchMap, tap, throwError } from "rxjs";
 import { AuthStore } from "./auth.store";
 import { HttpClient } from "@angular/common/http";
 import { UserService } from "../user/user.service";
-import { Login } from "./auth.model";
+import { Login, SignUp } from "./auth.model";
 import { Injectable } from "@angular/core";
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private loginUrl = '/auth/login';
+    private signUpUrl = '/auth/signup'
     private checkUrl = '/api/check';
     private refreshUrl = '/auth/refresh';
     private logoutUrl = '/api/logout';
@@ -26,6 +27,16 @@ export class AuthService {
             switchMap(() => this.loadAuthenticatedUser()),
             finalize(() => this.store.setLoading(false))
         );
+    }
+
+    signUp(user: SignUp): Observable<any> {
+        this.store.setLoading(true);
+        return this.http.post(this.signUpUrl, user).pipe(
+            catchError((err) => {
+                return throwError(() => new Error(err.error?.error || 'failed to signUp user'));
+            }),
+            finalize(() => this.store.setLoading(false))
+        )
     }
 
     check(): Observable<boolean> {

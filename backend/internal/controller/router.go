@@ -20,6 +20,14 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 		w.Write([]byte("pong"))
 	})
 
+	// --- serve your uploaded files here ---
+	// This assumes your Go binary runs inside "backend/"
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	// If you run your binary from the project root instead, use:
+	// r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("backend/uploads"))))
+	// You can log to confirm:
+	// fmt.Println("Serving static files from:", filepath.Join(os.Getwd(), "uploads"))
+
 	h := handlers.New(profile, recipe)
 
 	r.Post("/auth/signup", wrapper.PublicWrap(h.SignUp))
@@ -33,6 +41,8 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 
 		r.Route("/users", func(usersRouter chi.Router) {
 			usersRouter.Get("/me", wrapper.AuthWrap(h.GetCurrentUser))
+			usersRouter.Put("/{id}/update", wrapper.AuthWrap(h.UpdateUser))
+			usersRouter.Get("/{id}", wrapper.AuthWrap(h.GetUser))
 		})
 
 		r.Route("/recipes", func(recipesRouter chi.Router) {

@@ -59,6 +59,17 @@ func (p *ProfileService) Exists(ctx context.Context, userId uuid.UUID) (bool, er
 	return output, nil
 }
 
-func (p *ProfileService) GetCurrentUser(ctx context.Context, userId uuid.UUID) (*domain.User, error) {
+func (p *ProfileService) GetUser(ctx context.Context, userId uuid.UUID) (*domain.User, error) {
 	return p.repo.GetUserById(ctx, userId)
+}
+
+func (p *ProfileService) UpdateUser(ctx context.Context, userId uuid.UUID, imageUrl string) (*domain.User, error) {
+	u, err := p.GetUser(ctx, userId)
+	if err != nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	u.ImageURL = &imageUrl
+
+	return p.repo.Update(ctx, u)
 }

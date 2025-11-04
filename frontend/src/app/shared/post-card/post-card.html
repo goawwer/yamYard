@@ -1,0 +1,99 @@
+<mat-card class="feed-card">
+
+    <!-- AUTHOR HEADER -->
+    <mat-card-header class="author-header">
+
+        @if (canManage) {
+        <!-- PROFILE PAGE LAYOUT -->
+        <div class="left">
+            <div mat-card-avatar class="author-avatar">
+                @if (currentAvatarUrl) {
+                <img [src]="currentAvatarUrl" alt="Avatar" class="avatar-img">
+                } @else {
+                <mat-icon>person</mat-icon>
+                }
+            </div>
+            <mat-card-title class="author-name">{{ recipe.author_username }}</mat-card-title>
+        </div>
+
+        <div class="right">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onEdit()">
+                    <mat-icon>edit</mat-icon> Изменить
+                </button>
+                <button mat-menu-item (click)="onDelete()">
+                    <mat-icon>delete</mat-icon> Удалить
+                </button>
+            </mat-menu>
+        </div>
+        } @else {
+        <!-- FEED PAGE LAYOUT -->
+        <a [routerLink]="['/user', recipe.author_id]">
+            <div mat-card-avatar class="author-avatar">
+                @if (currentAvatarUrl) {
+                <img [src]="currentAvatarUrl" alt="Avatar" class="avatar-img">
+                } @else {
+                <mat-icon>person</mat-icon>
+                }
+            </div>
+            <mat-card-title class="author-name">{{ recipe.author_username }}</mat-card-title>
+        </a>
+        }
+
+    </mat-card-header>
+
+    <!-- IMAGE -->
+    @if (recipe.image_url) {
+    <img mat-card-image [src]="recipe.image_url" [alt]="recipe.title">
+    }
+
+    <!-- CONTENT -->
+    <mat-card-content class="card-content">
+        <h2 class="post-title">{{ recipe.title }}</h2>
+
+        <div class="description-container" [class.expanded]="expanded()">
+            <p class="post-description" [class.truncated]="!expanded()">
+                {{ recipe.description }}
+            </p>
+
+            @if (recipe.description && recipe.description.length > 120) {
+            <button mat-stroked-button class="expand-btn" (click)="toggleExpand(); $event.stopPropagation()">
+                {{ expanded() ? 'Скрыть' : 'Читать дальше' }}
+            </button>
+            }
+        </div>
+
+        <div class="recipe-meta">
+            @if (recipe.difficulty) {
+            <span class="meta-item">
+                <mat-icon inline>star</mat-icon>
+                {{ translateDifficulty(recipe.difficulty) }}
+            </span>
+            }
+            @if (recipe.cooking_time) {
+            <span class="meta-item">
+                <mat-icon inline>timer</mat-icon>
+                {{ recipe.cooking_time }} мин
+            </span>
+            }
+            @if (recipe.ingredients) {
+            <span class="meta-item ingredients">
+                <mat-icon inline>kitchen</mat-icon>
+                {{ recipe.ingredients }}
+            </span>
+            }
+        </div>
+    </mat-card-content>
+
+    <!-- FOOTER -->
+    <mat-card-actions align="start" class="card-actions">
+        <button mat-icon-button class="like-btn" (click)="toggleLike(); $event.stopPropagation()">
+            <mat-icon>favorite_border</mat-icon>
+        </button>
+        <span class="likes-count">23 лайка</span>
+        <span class="post-date-footer">{{ formatYekaterinburg(recipe.created_at) }}</span>
+    </mat-card-actions>
+</mat-card>

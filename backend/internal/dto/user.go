@@ -16,3 +16,10 @@ type LoginInput struct {
 type LoginOutput struct {
 	ID uuid.UUID
 }
+
+type UpdateUser struct {
+	Username string
+	Status   string
+	Bio      string
+	ImageURL string
+}

@@ -46,21 +46,32 @@ func (p *ProfileRepository) GetUserById(ctx context.Context, userId uuid.UUID) (
 	var user domain.User
 
 	query := `
-        SELECT id, username, email, hashed_password, created_at, updated_at, profile_status, bio, is_admin
-        FROM users
-        WHERE id = $1
-    `
+    SELECT
+        id,
+        email,
+        username,
+        hashed_password,
+        bio,
+        image_url,
+        profile_status,
+        is_admin,
+        created_at,
+        updated_at
+    FROM users
+    WHERE id = $1
+`
 
 	err := p.r.QueryRowContext(ctx, query, userId).Scan(
 		&user.ID,
-		&user.Username,
 		&user.Email,
+		&user.Username,
 		&user.HashedPassword,
+		&user.Bio,
+		&user.ImageURL,
+		&user.ProfileStatus,
+		&user.IsAdmin,
 		&user.CreatedAt,
 		&user.UpdatedAt,
-		&user.ProfileStatus,
-		&user.Bio,
-		&user.IsAdmin,
 	)
 
 	return &user, err
@@ -74,4 +85,48 @@ func (p *ProfileRepository) ExistsByID(ctx context.Context, id uuid.UUID) (bool,
 	err := p.r.QueryRowContext(ctx, query, id).Scan(&exists)
 
 	return exists, err
+}
+
+func (p *ProfileRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
+	query := `
+        UPDATE users
+        SET 
+            username = $1,
+            profile_status = $2,
+            bio = $3,
+			image_url = $4,
+            updated_at = current_timestamp
+        WHERE id = $5
+        RETURNING 
+            id, username, email, hashed_password, 
+            bio, image_url, profile_status, is_admin, 
+            created_at, updated_at
+    `
+
+	var updated domain.User
+
+	err := p.r.QueryRowContext(ctx, query,
+		user.Username,
+		user.ProfileStatus,
+		user.Bio,
+		user.ImageURL,
+		user.ID,
+	).Scan(
+		&updated.ID,
+		&updated.Username,
+		&updated.Email,
+		&updated.HashedPassword,
+		&updated.Bio,
+		&updated.ImageURL,
+		&updated.ProfileStatus,
+		&updated.IsAdmin,
+		&updated.CreatedAt,
+		&updated.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &updated, nil
 }

@@ -4,13 +4,28 @@
         <a [routerLink]="['/feed']">
             <mat-icon>arrow_back_ios_new</mat-icon>
         </a>
+
+        <div class="right">
+            <button class="btn-primary" type="submit" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+            </button>
+        </div>
+
         } @else {
-        <a [routerLink]="['/feed']" class="navbar__logo">yamYard</a>
-        }
+        <a [routerLink]="['/feed']" class="navbar__logo">
+            <img src="/yamYardLogo.png" />
+        </a>
 
         <a [routerLink]="['/me']">
+            @if (user$! | async; as user) {
+            @if (user.image_url) {
+            <img class="profile-picture" [src]="user.image_url" alt="Profile" />
+            } @else {
             <mat-icon class="profile-icon">account_circle</mat-icon>
+            }
+            }
         </a>
+        }
     </nav>
 
     <main class="layout__content">

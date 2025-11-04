@@ -1,6 +1,8 @@
 <div class="layout">
     <nav class="navbar">
-        <a [routerLink]="['/home']" class="navbar__logo">yamYard</a>
+        <a [routerLink]="['/home']">
+            <mat-icon>arrow_back_ios_new</mat-icon>
+        </a>
     </nav>
 
     <main class="layout__content">
@@ -10,4 +12,3 @@
     <footer class="footer">
         <p>© {{ currentYear }} Сельков Вадим АИС-22-1</p>
     </footer>
-</div>

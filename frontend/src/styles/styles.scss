@@ -1,23 +1,14 @@
 @use '@angular/material' as mat;
-@use '../styles/theme-colors' as *;
-@use 'sass:map';
+@use '../styles/theme-colors' as yamyard;
 
-@include mat.core();
-
-$yam-theme: mat.define-theme((color: (theme-type: light,
-                primary: mat.$red-palette,
+html {
+    @include mat.theme((color: (primary: yamyard.$primary-palette,
+                tertiary: yamyard.$tertiary-palette,
+                theme-type: light,
             ),
-            typography: (plain-family: Roboto,
-                brand-family: Open Sans,
-                bold-weight: 900,
-                medium-weight: 500,
-                regular-weight: 300,
-            ),
+            typography: Roboto,
+            density: 0,
         ));
-
-// apply it globally
-:root {
-    @include mat.all-component-themes($yam-theme);
 }
 
 /* optional global resets */
@@ -30,13 +21,84 @@ $yam-theme: mat.define-theme((color: (theme-type: light,
 * {
     margin: 0;
     font-family: "Montserrat", sans-serif;
+
+    color: #333;
+}
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+    &__content {
+        margin: 0 2rem;
+    }
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+
+    &__logo {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        width: 40px;
+
+
+        img {
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+    }
+
+    &__menu {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        a {
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+
+            &:hover,
+            &.active {
+                color: #000;
+            }
+        }
+    }
+
+    .profile-icon {
+        color: gray;
+        transform: scale(2);
+    }
+}
+
+.layout__content {
+    flex: 1;
+}
+
+.footer {
+    padding: 1rem;
+    text-align: center;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 0.9rem;
 }
 
 .btn-primary,
 .btn-secondary {
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 15px;
     cursor: pointer;
     font-weight: 500;
     transition: background 0.25s ease;
@@ -47,7 +109,7 @@ $yam-theme: mat.define-theme((color: (theme-type: light,
     color: #fff;
 
     &:hover {
-        background: #da2501;
+        background: #ff5533;
     }
 }
 
@@ -63,13 +125,66 @@ $yam-theme: mat.define-theme((color: (theme-type: light,
 }
 
 a {
-    color: #da2501;
+    color: #f8320b;
     text-decoration: none;
     font-weight: 500;
 
     &:hover {
-        text-decoration: underline;
         opacity: 0.7;
         transition: background 0.25s ease;
     }
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    /* shorthand for top/right/bottom/left: 0 */
+    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+    /* keeps form centered on small screens */
+}
+
+.editable-form-card {
+    background: #fff;
+    padding: 3rem 4rem;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    /* make it a bit wider */
+    width: 600px;
+    max-width: 90vw;
+    /* prevents overflow on small screens */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+    h2 {
+        margin-bottom: 2rem;
+    }
+}
+
+/* give spacing between form fields */
+.editable-form-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* inputs take full width of form */
+.editable-form-card input,
+.editable-form-card textarea,
+.editable-form-card select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
 }

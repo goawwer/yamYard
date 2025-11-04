@@ -44,6 +44,7 @@ export const routes: Routes = [
             { path: '', redirectTo: 'feed', pathMatch: 'full' },
             { path: 'feed', component: FeedComponent },
             { path: 'me', component: ProfileComponent },
+            { path: 'user/:id', component: ProfileComponent }
         ]
     },
 

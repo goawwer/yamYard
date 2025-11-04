@@ -38,7 +38,7 @@ func Start(ctx context.Context, cfg *config.Config) {
 
 	recipeRepo := RecipeRepo.NewRecipeRepository(database.Get())
 
-	recipeUsecase := recipeService.NewRecipeService(recipeRepo)
+	recipeUsecase := recipeService.NewRecipeService(recipeRepo, "uploads/recipes_images")
 
 	middleware.InitAuthConfig(cfg.JWT.Secret)
 

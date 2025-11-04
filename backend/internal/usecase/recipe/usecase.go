@@ -17,11 +17,13 @@ type RecipeRepository interface {
 }
 
 type RecipeService struct {
-	repo RecipeRepository
+	repo      RecipeRepository
+	uploadDir string
 }
 
-func NewRecipeService(repo RecipeRepository) *RecipeService {
+func NewRecipeService(repo RecipeRepository, uploadDir string) *RecipeService {
 	return &RecipeService{
-		repo: repo,
+		repo:      repo,
+		uploadDir: uploadDir,
 	}
 }
