@@ -37,6 +37,7 @@ type TokenPair struct {
 type CustomClaims struct {
 	UserID    uuid.UUID `json:"user_id"`
 	TokenType string    `json:"token_type"`
+	IsAdmin   bool      `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -44,7 +45,7 @@ type contextKey string
 
 const ClaimsKey contextKey = "claims"
 
-func GenerateTokenPair(userID uuid.UUID) (*TokenPair, error) {
+func GenerateTokenPair(userID uuid.UUID, isAdmin bool) (*TokenPair, error) {
 	now := time.Now()
 
 	accessExp := now.Add(time.Minute * 3)
@@ -53,6 +54,7 @@ func GenerateTokenPair(userID uuid.UUID) (*TokenPair, error) {
 	accessClaims := CustomClaims{
 		UserID:    userID,
 		TokenType: "access",
+		IsAdmin:   isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(accessExp),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -70,6 +72,7 @@ func GenerateTokenPair(userID uuid.UUID) (*TokenPair, error) {
 	refreshClaims := CustomClaims{
 		UserID:    userID,
 		TokenType: "refresh",
+		IsAdmin:   isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(refreshExp),
 			IssuedAt:  jwt.NewNumericDate(now),

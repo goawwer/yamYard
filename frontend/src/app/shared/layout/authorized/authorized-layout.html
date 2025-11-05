@@ -16,6 +16,15 @@
             <img src="/yamYardLogo.png" />
         </a>
 
+        @if (user$ | async; as user) {
+        @if (user.is_admin) {
+        <a [routerLink]="['/admin']" class="admin-btn">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Админ панель</span>
+        </a>
+        }
+        }
+
         <a [routerLink]="['/me']">
             @if (user$! | async; as user) {
             @if (user.image_url) {

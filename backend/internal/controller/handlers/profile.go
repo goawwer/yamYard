@@ -42,7 +42,7 @@ func (h *Handlers) Login(w *wrapper.Wrapper) error {
 		return wrapper.NewError(http.StatusBadRequest, "invalid request body")
 	}
 
-	userID, err := h.profile.Login(w.Request().Context(), input)
+	userID, isAdmin, err := h.profile.Login(w.Request().Context(), input)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -54,7 +54,7 @@ func (h *Handlers) Login(w *wrapper.Wrapper) error {
 		}
 	}
 
-	pair, err := middleware.GenerateTokenPair(userID)
+	pair, err := middleware.GenerateTokenPair(userID, isAdmin)
 	if err != nil {
 		logger.Error("failed to generate token pair: ", err)
 		return err
@@ -112,7 +112,7 @@ func (h *Handlers) Refresh(w *wrapper.Wrapper) error {
 		return wrapper.NewError(http.StatusUnauthorized, "user not found")
 	}
 
-	pair, err := middleware.GenerateTokenPair(claims.UserID)
+	pair, err := middleware.GenerateTokenPair(claims.UserID, claims.IsAdmin)
 	if err != nil {
 		logger.Error("failed to generate token pair: ", err)
 		return err

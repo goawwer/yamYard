@@ -6,14 +6,16 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/goawwer/yamyard/internal/controller/handlers"
 	"github.com/goawwer/yamyard/internal/controller/handlers/wrapper"
+	"github.com/goawwer/yamyard/internal/middleware"
 	jwt "github.com/goawwer/yamyard/internal/middleware"
+	AdminUsecase "github.com/goawwer/yamyard/internal/usecase/admin"
 	LikeUsecase "github.com/goawwer/yamyard/internal/usecase/like"
 	ProfileUsecase "github.com/goawwer/yamyard/internal/usecase/profile"
 	RecipeUsecase "github.com/goawwer/yamyard/internal/usecase/recipe"
 	"github.com/goawwer/yamyard/pkg/helpers"
 )
 
-func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.RecipeService, like *LikeUsecase.LikeService) http.Handler {
+func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.RecipeService, like *LikeUsecase.LikeService, admin *AdminUsecase.AdminService) http.Handler {
 	r := chi.NewRouter()
 
 	r.HandleFunc("/ping", func(w http.ResponseWriter, _ *http.Request) {
@@ -29,7 +31,7 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 	// You can log to confirm:
 	// fmt.Println("Serving static files from:", filepath.Join(os.Getwd(), "uploads"))
 
-	h := handlers.New(profile, recipe, like)
+	h := handlers.New(profile, recipe, like, admin)
 
 	r.Post("/auth/signup", wrapper.PublicWrap(h.SignUp))
 	r.Post("/auth/login", wrapper.PublicWrap(h.Login))
@@ -55,6 +57,15 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 			recipesRouter.Delete("/{id}/delete", wrapper.AuthWrap(h.DeleteRecipe))
 			recipesRouter.Get("/{id}", wrapper.AuthWrap(h.GetRecipeByID))
 		})
+	})
+
+	r.Route("/api/admin", func(admin chi.Router) {
+		admin.Use(jwt.Middleware, middleware.AdminOnly) // ← ДВА middleware
+
+		admin.Get("/users", wrapper.AuthWrap(h.GetUsersToAdmin))
+		admin.Delete("/users/{id}", wrapper.AuthWrap(h.DeleteUserByAdmin))
+		admin.Get("/recipes", wrapper.AuthWrap(h.GetRecipesToAdmin))
+		admin.Delete("/recipes/{id}", wrapper.AuthWrap(h.DeleteRecipeByAdmin))
 	})
 
 	return r

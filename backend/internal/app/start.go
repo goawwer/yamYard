@@ -11,11 +11,13 @@ import (
 
 	"github.com/goawwer/yamyard/config"
 	"github.com/goawwer/yamyard/internal/adataper/database"
+	adminRepo "github.com/goawwer/yamyard/internal/adataper/database/admin"
 	LikeRepo "github.com/goawwer/yamyard/internal/adataper/database/like"
 	ProfileRepo "github.com/goawwer/yamyard/internal/adataper/database/profile"
 	RecipeRepo "github.com/goawwer/yamyard/internal/adataper/database/recipe"
 	"github.com/goawwer/yamyard/internal/controller"
 	"github.com/goawwer/yamyard/internal/middleware"
+	adminService "github.com/goawwer/yamyard/internal/usecase/admin"
 	likeService "github.com/goawwer/yamyard/internal/usecase/like"
 	profileService "github.com/goawwer/yamyard/internal/usecase/profile"
 	recipeService "github.com/goawwer/yamyard/internal/usecase/recipe"
@@ -46,9 +48,13 @@ func Start(ctx context.Context, cfg *config.Config) {
 
 	likeUsecase := likeService.NewLikeService(likeRepo, recipeRepo)
 
+	adminRepo := adminRepo.NewAdminRepository(database.Get())
+
+	adminUsecase := adminService.NewAdminService(adminRepo)
+
 	middleware.InitAuthConfig(cfg.JWT.Secret)
 
-	r := controller.Router(profileUsecase, recipeUsecase, likeUsecase)
+	r := controller.Router(profileUsecase, recipeUsecase, likeUsecase, adminUsecase)
 
 	httpServer := server.New(r, &cfg.Server)
 

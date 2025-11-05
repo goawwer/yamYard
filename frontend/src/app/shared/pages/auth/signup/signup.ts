@@ -41,7 +41,7 @@ export class SignupComponent implements OnInit {
 
         this.service.signUp(this.signupForm.value).subscribe({
             next: () => {
-                this.router.navigate(['/login']);
+                this.router.navigate(['/auth', 'login']);
             },
             error: (err) => {
                 alert(`Login failed: ${err.message}`);

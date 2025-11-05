@@ -33,6 +33,7 @@ export class PostCardComponent {
     @Output() edit = new EventEmitter<void>();
     @Output() delete = new EventEmitter<void>();
     @Output() like = new EventEmitter<string>();
+
     recipe$!: Observable<Recipe | undefined>;
 
     expanded = signal(false);

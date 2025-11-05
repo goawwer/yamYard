@@ -36,18 +36,20 @@ func (p *ProfileService) SignUp(ctx context.Context, input dto.SignUpUserInput) 
 	return nil
 }
 
-func (p *ProfileService) Login(ctx context.Context, input dto.LoginInput) (uuid.UUID, error) {
+func (p *ProfileService) Login(ctx context.Context, input dto.LoginInput) (uuid.UUID, bool, error) {
+	var isAdmin bool
+
 	output, err := p.repo.GetUserByEmail(ctx, input.Email)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, isAdmin, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(output.HashedPassword), []byte(input.Password))
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("invalid credentials: %w", err)
+		return uuid.Nil, isAdmin, fmt.Errorf("invalid credentials: %w", err)
 	}
 
-	return output.ID, nil
+	return output.ID, isAdmin, nil
 }
 
 func (p *ProfileService) Exists(ctx context.Context, userId uuid.UUID) (bool, error) {

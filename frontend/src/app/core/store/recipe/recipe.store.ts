@@ -36,7 +36,7 @@ export class RecipeStore extends EntityStore<RecipeState> {
         this.update(state => ({
             likedRecipeIds: new Set(recipes.map(r => r.id))
         }));
-        this.upsertMany(recipes); // ← upsertMany умеет с []
+        this.upsertMany(recipes);
     }
 
     // Update a single recipe's like state

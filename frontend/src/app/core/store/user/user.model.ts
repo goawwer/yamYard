@@ -6,7 +6,7 @@ export interface User {
     bio?: string;
     profileStatus?: string;
     image_url?: string;
-    isAdmin: string;
+    is_admin: string;
     createdAt: string;
     updatedAt: string;
 }

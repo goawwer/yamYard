@@ -12,6 +12,8 @@ import { FeedComponent } from './shared/pages/feed/feed';
 import { UnauthorizedLayoutComponent } from './shared/layout/unauthorized/unauthorized-layout';
 import { AuthorizedLayoutComponent } from './shared/layout/authorized/authorized-layout';
 import { ProfileComponent } from './shared/pages/profile/profile';
+import { AdminGuard } from './core/guards/admin.guard';
+import { AdminComponent } from './shared/pages/admin/admin';
 
 export const routes: Routes = [
     // Public pages
@@ -45,6 +47,17 @@ export const routes: Routes = [
             { path: 'feed', component: FeedComponent },
             { path: 'me', component: ProfileComponent },
             { path: 'user/:id', component: ProfileComponent }
+        ]
+    },
+
+    {
+        path: '',
+        component: AuthorizedLayoutComponent,
+        canActivate: [AdminGuard],
+        children: [
+            // Redirect empty path '' to 'feed' for authorized users
+            { path: '', redirectTo: 'feed', pathMatch: 'full' },
+            { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] }
         ]
     },
 
