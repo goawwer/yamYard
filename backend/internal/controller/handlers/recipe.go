@@ -36,7 +36,7 @@ func (h *Handlers) CreateRecipe(w *wrapper.Wrapper, c *middleware.CustomClaims) 
 
 func (h *Handlers) GetAllRecipes(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
 	params := helpers.GetValidQueryParameters(w.Request(), domain.Recipe{})
-	return h.recipe.GetAll(w.Request().Context(), params)
+	return h.recipe.GetAll(w.Request().Context(), params, c.UserID)
 }
 
 func (h *Handlers) GetRecipeByID(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {

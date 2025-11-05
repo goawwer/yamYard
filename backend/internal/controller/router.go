@@ -7,12 +7,13 @@ import (
 	"github.com/goawwer/yamyard/internal/controller/handlers"
 	"github.com/goawwer/yamyard/internal/controller/handlers/wrapper"
 	jwt "github.com/goawwer/yamyard/internal/middleware"
+	LikeUsecase "github.com/goawwer/yamyard/internal/usecase/like"
 	ProfileUsecase "github.com/goawwer/yamyard/internal/usecase/profile"
 	RecipeUsecase "github.com/goawwer/yamyard/internal/usecase/recipe"
 	"github.com/goawwer/yamyard/pkg/helpers"
 )
 
-func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.RecipeService) http.Handler {
+func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.RecipeService, like *LikeUsecase.LikeService) http.Handler {
 	r := chi.NewRouter()
 
 	r.HandleFunc("/ping", func(w http.ResponseWriter, _ *http.Request) {
@@ -28,7 +29,7 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 	// You can log to confirm:
 	// fmt.Println("Serving static files from:", filepath.Join(os.Getwd(), "uploads"))
 
-	h := handlers.New(profile, recipe)
+	h := handlers.New(profile, recipe, like)
 
 	r.Post("/auth/signup", wrapper.PublicWrap(h.SignUp))
 	r.Post("/auth/login", wrapper.PublicWrap(h.Login))
@@ -48,6 +49,8 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 		r.Route("/recipes", func(recipesRouter chi.Router) {
 			recipesRouter.Get("/", wrapper.AuthWrap(h.GetAllRecipes))
 			recipesRouter.Post("/create", wrapper.AuthWrap(h.CreateRecipe))
+			recipesRouter.Get("/liked", wrapper.AuthWrap(h.GetLikedRecipes))
+			recipesRouter.Post("/{id}/like", wrapper.AuthWrap(h.ToggleLike))
 			recipesRouter.Put("/{id}/update", wrapper.AuthWrap(h.UpdateRecipe))
 			recipesRouter.Delete("/{id}/delete", wrapper.AuthWrap(h.DeleteRecipe))
 			recipesRouter.Get("/{id}", wrapper.AuthWrap(h.GetRecipeByID))

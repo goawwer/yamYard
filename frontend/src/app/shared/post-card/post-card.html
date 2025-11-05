@@ -1,4 +1,5 @@
 <mat-card class="feed-card">
+    @if (recipe$ | async; as recipe) {
 
     <!-- AUTHOR HEADER -->
     <mat-card-header class="author-header">
@@ -90,10 +91,13 @@
 
     <!-- FOOTER -->
     <mat-card-actions align="start" class="card-actions">
-        <button mat-icon-button class="like-btn" (click)="toggleLike(); $event.stopPropagation()">
-            <mat-icon>favorite_border</mat-icon>
+        <button mat-icon-button class="like-btn" (click)="toggleLike(); $event.stopPropagation()"
+            [class.liked]="recipe.is_liked">
+            <mat-icon>{{ recipe.is_liked ? 'favorite' : 'favorite_border' }}</mat-icon>
         </button>
-        <span class="likes-count">23 лайка</span>
-        <span class="post-date-footer">{{ formatYekaterinburg(recipe.created_at) }}</span>
+        <span class="likes-count">
+            {{ recipe.likes_count }} {{ recipe.likes_count === 1 ? 'лайк' : 'лайков' }}
+        </span>
     </mat-card-actions>
+    }
 </mat-card>

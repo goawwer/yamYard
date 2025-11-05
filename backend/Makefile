@@ -10,7 +10,7 @@ migrate_up:
 migrate_down: 
 		migrate -database $(DB_URL) -path migrations down 
 
-mifrate_force:
+migrate_force:
 		migrate -database $(DB_URL) -path migrations force $(v)
 
 

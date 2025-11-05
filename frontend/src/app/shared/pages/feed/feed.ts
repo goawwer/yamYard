@@ -11,6 +11,7 @@ import { UserService } from '../../../core/store/user/user.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { FEEDCOMPONENTS } from './feed.imports';
 import { User } from '../../../core/store/user/user.model';
+import { RecipeStore } from '../../../core/store/recipe/recipe.store';
 
 @Component({
     selector: 'app-feed',
@@ -51,6 +52,7 @@ export class FeedComponent {
     constructor(
         private service: RecipeService,
         private query: RecipeQuery,
+        private store: RecipeStore,
         private userService: UserService,
         private userQuery: UserQuery,
         private sanitizer: DomSanitizer,
@@ -129,6 +131,8 @@ export class FeedComponent {
             ingredients: this.recipeForm.value.ingredients!,
             cooking_time: this.recipeForm.value.cooking_time || 0,
             difficulty: this.recipeForm.value.difficulty?.toLocaleLowerCase() || 'medium',
+            likes_count: 0,
+            is_liked: false,
             created_at: now,
             updated_at: now,
         };
@@ -164,7 +168,33 @@ export class FeedComponent {
     }
 
     // ── LIKE STUB ───────────────────────────────────────────────
-    toggleLike(id: string) {
-        console.log('Toggle like', id);
+    toggleLike(recipeId: string) {
+        const recipe = this.query.getEntity(recipeId);
+        if (!recipe) return;
+
+        const optimisticLike = !recipe.is_liked;
+
+        // ✅ optimistic visual update
+        this.store.updateLike(recipeId, {
+            is_liked: optimisticLike,
+            likes_count: (recipe.likes_count ?? 0) + (optimisticLike ? 1 : -1)
+        });
+
+        this.service.toggleLike(recipeId).subscribe({
+            next: (res) => {
+                // ✅ replace with server truth (so not double-count)
+                this.store.updateLike(recipeId, {
+                    is_liked: res.liked,
+                    likes_count: res.likes_count
+                });
+            },
+            error: () => {
+                // revert on error
+                this.store.updateLike(recipeId, {
+                    is_liked: !optimisticLike,
+                    likes_count: (recipe.likes_count ?? 0)
+                });
+            }
+        });
     }
 }

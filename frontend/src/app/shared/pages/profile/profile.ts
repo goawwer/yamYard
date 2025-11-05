@@ -12,6 +12,7 @@ import { PROFILECOMPONENTS } from './profile.imports';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../helpers/dialog/dialog.component';
+import { RecipeQuery } from '../../../core/store/recipe/recipe.query';
 
 @Component({
     selector: 'app-profile',
@@ -23,6 +24,7 @@ export class ProfileComponent implements OnInit {
     isUpdating = signal(false);
     user$!: Observable<User | undefined>;
     recipes$!: Observable<Recipe[]>;
+    likedRecipes$!: Observable<Recipe[]>;        // NEW
     editForm = new FormGroup({
         username: new FormControl(''),
         profileStatus: new FormControl(''),
@@ -56,6 +58,7 @@ export class ProfileComponent implements OnInit {
         private userService: UserService,
         private userQuery: UserQuery,
         private recipeService: RecipeService,
+        private recipeQuery: RecipeQuery,
         private route: ActivatedRoute,
         private sanitizer: DomSanitizer,
         private dialog: MatDialog
@@ -80,6 +83,15 @@ export class ProfileComponent implements OnInit {
                 return this.recipeService.getAllRecipes(
                     { active: 'created_at', direction: 'desc' } as Sort,
                     { column: 'username', value: user.username }
+                );
+            })
+        );
+
+        this.likedRecipes$ = this.user$.pipe(
+            switchMap(user => {
+                if (!user) return of([]);
+                return this.recipeService.getLikedRecipes(
+                    { active: 'created_at', direction: 'desc' } as Sort
                 );
             })
         );
@@ -227,8 +239,11 @@ export class ProfileComponent implements OnInit {
         dialogRef.afterClosed().subscribe((confirmed) => {
             if (confirmed) {
                 this.recipeService.deleteRecipe(recipe.id).pipe(
-                    switchMap(() => this.recipeService.getAllRecipes()),
-                    finalize(() => this.dialog.closeAll())
+                    switchMap(() => this.recipeService.getAllRecipes(
+                        { active: 'created_at', direction: 'desc' } as Sort,
+                        { column: 'username', value: this.userQuery.getActive()?.username || '' }
+                    )),
+                    take(1)
                 ).subscribe((recipes) => {
                     this.recipes$ = of(recipes);
                 });
@@ -237,6 +252,17 @@ export class ProfileComponent implements OnInit {
     }
 
     toggleLike(id: string) {
-        console.log('Toggle like', id);
+        this.recipeService.toggleLike(id).pipe(
+            // After like/unlike, refresh liked recipes
+            switchMap(() => this.recipeService.getLikedRecipes(
+                { active: 'created_at', direction: 'desc' } as Sort
+            )),
+            take(1)
+        ).subscribe({
+            next: (liked) => {
+                this.likedRecipes$ = of(liked);
+            },
+            error: (err) => console.error('Like failed', err)
+        });
     }
 }

@@ -18,4 +18,6 @@ type Recipe struct {
 	ImageURL       *string   `db:"image_url" json:"image_url"`
 	CreatedAt      time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at" json:"updated_at"`
+	LikesCount     int       `json:"likes_count"`
+	IsLiked        bool      `json:"is_liked"`
 }

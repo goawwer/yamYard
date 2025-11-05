@@ -10,6 +10,8 @@ export interface Recipe {
     image_url?: string;
     created_at: string;
     updated_at: string;
+    likes_count: number;        // <-- NEW
+    is_liked?: boolean;
 }
 
 export interface isUpdatingRecipe {

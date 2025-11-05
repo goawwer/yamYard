@@ -26,7 +26,7 @@
     @if (recipes$ | async; as recipes) {
     @if (recipes.length > 0) {
     @for (recipe of recipes; track recipe.id) {
-    <app-post-card [recipe]="recipe" [currentAvatarUrl]="currentAvatarUrl()" (like)="toggleLike(recipe.id)">
+    <app-post-card [recipeId]="recipe.id" [currentAvatarUrl]="currentAvatarUrl()" (like)="toggleLike(recipe.id)">
     </app-post-card>
     }
     } @else {

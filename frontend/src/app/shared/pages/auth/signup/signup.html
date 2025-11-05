@@ -55,7 +55,8 @@
         <textarea matInput formControlName="description" rows="5"></textarea>
     </mat-form-field>
 
-    <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid || isSubmitted">
+    <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid || isSubmitted"
+        [routerLink]="['/auth', 'login']">
         Зарегистрироваться
     </button>
 

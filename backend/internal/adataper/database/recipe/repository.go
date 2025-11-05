@@ -62,28 +62,33 @@ func (r *RecipeRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.R
 		&recipe.ImageURL,
 		&recipe.CreatedAt,
 		&recipe.UpdatedAt,
+		&recipe.LikesCount,
 	)
 
 	return &recipe, err
 }
 
-func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.Recipe, error) {
+// internal/adataper/repository/recipe/recipe.go
+func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSortingParameters, userID uuid.UUID) ([]*domain.Recipe, error) {
 	var recipes []*domain.Recipe
 
-	// Base query
+	// Base query with likes_count and is_liked
 	query := `
-  		SELECT 
-   		 	r.id, r.author_id, u.username, u.image_url as author_avatar_url,
-    		r.title, r.description, r.ingredients, r.cooking_time, 
-    		r.difficulty, r.image_url, r.created_at, r.updated_at
-  		FROM recipes r
-  		JOIN users u ON r.author_id = u.id
-	`
+        SELECT 
+            r.id, r.author_id, u.username, u.image_url as author_avatar_url,
+            r.title, r.description, r.ingredients, r.cooking_time, 
+            r.difficulty, r.image_url, r.created_at, r.updated_at,
+            r.likes_count,
+            EXISTS(SELECT 1 FROM likes l WHERE l.recipe_id = r.id AND l.user_id = $1) AS is_liked
+        FROM recipes r
+        JOIN users u ON r.author_id = u.id
+    `
 
 	// arguments for WHERE placeholders
-	args := []any{}
+	args := []any{userID} // <-- pass current user ID first
 	where := []string{}
 
+	// Username filter - against u.username (not r.author_id!)
 	if input.Username != "" {
 		where = append(where, fmt.Sprintf("u.username ILIKE $%d", len(args)+1))
 		args = append(args, "%"+input.Username+"%")
@@ -98,6 +103,7 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 		query += " WHERE " + strings.Join(where, " AND ")
 	}
 
+	// ... rest of sorting logic unchanged ...
 	sortField := "r.created_at"
 	if input.Sort != "" {
 		sortField = "r." + input.Sort
@@ -109,6 +115,7 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 	}
 
 	query += fmt.Sprintf(" ORDER BY %s %s", sortField, order)
+
 	rows, err := r.r.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query recipes: %w", err)
@@ -119,6 +126,8 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 		var rec domain.Recipe
 		var username string
 		var authorAvatarURL *string
+		var isLiked bool // NEW
+
 		err := rows.Scan(
 			&rec.ID,
 			&rec.AuthorID,
@@ -132,12 +141,15 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 			&rec.ImageURL,
 			&rec.CreatedAt,
 			&rec.UpdatedAt,
+			&rec.LikesCount, // NEW
+			&isLiked,        // NEW
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan recipe: %w", err)
 		}
 
 		rec.AuthorUsername = username
+		rec.IsLiked = isLiked // NEW
 		recipes = append(recipes, &rec)
 	}
 

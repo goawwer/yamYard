@@ -11,7 +11,7 @@ import (
 type RecipeRepository interface {
 	Create(ctx context.Context, recipe *domain.Recipe) error
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Recipe, error)
-	GetAll(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.Recipe, error)
+	GetAll(ctx context.Context, input helpers.FilterAndSortingParameters, userID uuid.UUID) ([]*domain.Recipe, error)
 	Update(ctx context.Context, recipe *domain.Recipe) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

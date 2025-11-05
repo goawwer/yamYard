@@ -18,8 +18,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r RecipeService) GetAll(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.Recipe, error) {
-	return r.repo.GetAll(ctx, input)
+func (r RecipeService) GetAll(ctx context.Context, input helpers.FilterAndSortingParameters, userID uuid.UUID) ([]*domain.Recipe, error) {
+	return r.repo.GetAll(ctx, input, userID)
 }
 
 func (r RecipeService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Recipe, error) {

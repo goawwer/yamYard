@@ -34,8 +34,9 @@
             @if (recipes.length > 0) {
             <div class="profile-feed-container">
                 @for (recipe of recipes; track recipe.id) {
-                <app-post-card [recipe]="recipe" [currentAvatarUrl]="currentAvatarUrl()" [canManage]="true"
-                    (edit)="openRecipeEdit(recipe)" (delete)="deleteRecipe(recipe)" (like)="toggleLike(recipe.id)">
+                <app-post-card [recipeId]="recipe.id" [currentAvatarUrl]="currentAvatarUrl()"
+                    [canManage]="isOwnProfile()" (like)="toggleLike(recipe.id)" (edit)="openRecipeEdit(recipe)"
+                    (delete)="deleteRecipe(recipe)">
                 </app-post-card>
                 }
             </div>
@@ -53,7 +54,30 @@
             }
         </section>
     </mat-tab>
-    <mat-tab label="Понравившиеся"></mat-tab>
+
+    <!-- LIKED TAB -->
+    <mat-tab label="Понравившиеся">
+        <section class="posts-section">
+            @if (likedRecipes$ | async; as liked) {
+            @if (liked.length > 0) {
+            <div class="profile-feed-container">
+                @for (recipe of liked; track recipe.id) {
+                <app-post-card [recipeId]="recipe.id" [currentAvatarUrl]="currentAvatarUrl()" [canManage]="false"
+                    (like)="toggleLike(recipe.id)">
+                </app-post-card>
+                }
+            </div>
+            } @else {
+            <div class="empty-state">
+                <mat-icon class="empty-icon">favorite_border</mat-icon>
+                <h3>Нет понравившихся рецептов</h3>
+            </div>
+            }
+            } @else {
+            <div class="loading-state">Загружаем...</div>
+            }
+        </section>
+    </mat-tab>
 </mat-tab-group>
 
 
