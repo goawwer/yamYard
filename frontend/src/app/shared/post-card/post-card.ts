@@ -26,9 +26,9 @@ import { RecipeQuery } from '../../core/store/recipe/recipe.query';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PostCardComponent {
-    @Input({ required: true }) recipeId!: string;
+    @Input({ required: true }) recipe!: Recipe;
     @Input() canManage = false;
-    @Input() currentAvatarUrl?: string | null = null;
+    @Input() avatarURL?: string | null = null;
 
     @Output() edit = new EventEmitter<void>();
     @Output() delete = new EventEmitter<void>();
@@ -41,11 +41,11 @@ export class PostCardComponent {
     constructor(private query: RecipeQuery) { }
 
     ngOnInit() {
-        this.recipe$ = this.query.selectEntity(this.recipeId);
+        this.recipe$ = this.query.selectEntity(this.recipe.id);
     }
 
     toggleLike() {
-        this.like.emit(this.recipeId);
+        this.like.emit(this.recipe.id);
     }
 
     toggleExpand() {

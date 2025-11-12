@@ -23,6 +23,7 @@ type UserEntity struct {
 	Email          string    `db:"email"`
 	Username       string    `db:"username"`
 	HashedPassword string    `db:"hashed_password"`
+	IsAdmin        bool      `db:"is_admin"`
 }
 
 func (u User) Validate() error {

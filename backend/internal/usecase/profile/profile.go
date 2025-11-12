@@ -7,6 +7,7 @@ import (
 
 	"github.com/goawwer/yamyard/internal/domain"
 	"github.com/goawwer/yamyard/internal/dto"
+	"github.com/goawwer/yamyard/pkg/helpers"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,19 +38,17 @@ func (p *ProfileService) SignUp(ctx context.Context, input dto.SignUpUserInput) 
 }
 
 func (p *ProfileService) Login(ctx context.Context, input dto.LoginInput) (uuid.UUID, bool, error) {
-	var isAdmin bool
-
 	output, err := p.repo.GetUserByEmail(ctx, input.Email)
 	if err != nil {
-		return uuid.Nil, isAdmin, err
+		return uuid.Nil, false, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(output.HashedPassword), []byte(input.Password))
 	if err != nil {
-		return uuid.Nil, isAdmin, fmt.Errorf("invalid credentials: %w", err)
+		return uuid.Nil, false, fmt.Errorf("invalid credentials: %w", err)
 	}
 
-	return output.ID, isAdmin, nil
+	return output.ID, output.IsAdmin, nil
 }
 
 func (p *ProfileService) Exists(ctx context.Context, userId uuid.UUID) (bool, error) {
@@ -74,4 +73,8 @@ func (p *ProfileService) UpdateUser(ctx context.Context, userId uuid.UUID, image
 	u.ImageURL = &imageUrl
 
 	return p.repo.Update(ctx, u)
+}
+
+func (p *ProfileService) GetAllUsers(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.User, error) {
+	return p.repo.GetAllUsers(ctx, input)
 }

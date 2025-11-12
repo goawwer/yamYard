@@ -114,6 +114,7 @@ func (l *LikeRepository) LikedRecipes(ctx context.Context, userID uuid.UUID, inp
 		}
 
 		rec.AuthorUsername = username
+		rec.AuthorAvatarURL = authorAvatarURL
 		rec.IsLiked = isLiked
 		recipes = append(recipes, &rec)
 	}

@@ -59,7 +59,6 @@
             }
 
             .settings-btn {
-                margin-top: 0.75rem;
                 color: var(--accent);
                 transition: transform 0.2s ease;
             }
@@ -87,18 +86,16 @@
         }
 
         .empty-icon {
-            font-size: 4rem;
             color: #666;
             margin-bottom: 1rem;
         }
 
         .empty-state h3 {
-            color: #1a1a1a;
+            color: #666;
             margin: 0 0 0.5rem 0;
         }
 
         .empty-state p {
-            color: #666;
             margin-bottom: 1rem;
         }
     }
@@ -194,7 +191,6 @@
         }
 
         .placeholder {
-            font-size: 48px;
             color: #bbb;
         }
     }

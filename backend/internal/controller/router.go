@@ -44,6 +44,7 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 
 		r.Route("/users", func(usersRouter chi.Router) {
 			usersRouter.Get("/me", wrapper.AuthWrap(h.GetCurrentUser))
+			usersRouter.Get("/", wrapper.AuthWrap(h.GetAllUsers))
 			usersRouter.Put("/{id}/update", wrapper.AuthWrap(h.UpdateUser))
 			usersRouter.Get("/{id}", wrapper.AuthWrap(h.GetUser))
 		})
@@ -60,7 +61,7 @@ func Router(profile *ProfileUsecase.ProfileService, recipe *RecipeUsecase.Recipe
 	})
 
 	r.Route("/api/admin", func(admin chi.Router) {
-		admin.Use(jwt.Middleware, middleware.AdminOnly) // ← ДВА middleware
+		admin.Use(jwt.Middleware, middleware.AdminOnly)
 
 		admin.Get("/users", wrapper.AuthWrap(h.GetUsersToAdmin))
 		admin.Delete("/users/{id}", wrapper.AuthWrap(h.DeleteUserByAdmin))

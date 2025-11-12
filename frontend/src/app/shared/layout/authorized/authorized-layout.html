@@ -13,18 +13,27 @@
 
         } @else {
         <a [routerLink]="['/feed']" class="navbar__logo">
-            <img src="/yamYardLogo.png" />
+            Вкусный двор
         </a>
 
         @if (user$ | async; as user) {
         @if (user.is_admin) {
-        <a [routerLink]="['/admin']" class="admin-btn">
-            <mat-icon>admin_panel_settings</mat-icon>
-            <span>Админ панель</span>
-        </a>
-        }
-        }
-
+        <div class="right">
+            <a [routerLink]="['/admin']" class="admin-btn">
+                <span>Админ панель</span>
+                <mat-icon>admin_panel_settings</mat-icon>
+            </a>
+            <a [routerLink]="['/me']">
+                @if (user$! | async; as user) {
+                @if (user.image_url) {
+                <img class="profile-picture" [src]="user.image_url" alt="Profile" />
+                } @else {
+                <mat-icon class="profile-icon">account_circle</mat-icon>
+                }
+                }
+            </a>
+        </div>
+        } @else {
         <a [routerLink]="['/me']">
             @if (user$! | async; as user) {
             @if (user.image_url) {
@@ -34,6 +43,10 @@
             }
             }
         </a>
+        }
+        }
+
+
         }
     </nav>
 

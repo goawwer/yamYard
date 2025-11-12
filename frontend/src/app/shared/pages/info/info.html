@@ -1,0 +1,44 @@
+<!-- ABOUT PAGE – MODERN FEED-STYLE -->
+<section class="about-page">
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="page-header">
+            <h1 class="page-title">О проекте YamYard</h1>
+            <p class="page-subtitle">
+                YamYard — это место, где каждый может поделиться своими домашними рецептами,
+                узнать что-то новое и вдохновиться идеями других кулинаров.
+            </p>
+        </header>
+
+        <!-- FAQ ACCORDION (like feed cards) -->
+        <section class="faq-feed">
+            @for (item of faqItems(); track item.question) {
+            <mat-card class="faq-card" appearance="outlined" [class.expanded]="item.expanded" (click)="toggleFaq(item)">
+                <mat-card-content>
+                    <div class="faq-header">
+                        <h3 class="faq-question">{{ item.question }}</h3>
+                        <mat-icon class="expand-icon">
+                            {{ item.expanded ? 'expand_less' : 'expand_more' }}
+                        </mat-icon>
+                    </div>
+
+                    @if (item.expanded) {
+                    <div class="faq-answer" @fadeSlide>
+                        <p [innerHTML]="item.answer"></p>
+                    </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+            }
+        </section>
+
+        <!-- BACK BUTTON (same style as FAB) -->
+        <div class="back-action">
+            <button class="btn-primary" [routerLink]="['/home']">
+                На главную
+            </button>
+        </div>
+
+    </div>
+</section>

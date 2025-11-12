@@ -2,9 +2,12 @@ package profile
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/goawwer/yamyard/internal/adataper/database"
 	"github.com/goawwer/yamyard/internal/domain"
+	"github.com/goawwer/yamyard/pkg/helpers"
 	"github.com/google/uuid"
 )
 
@@ -34,10 +37,10 @@ func (p *ProfileRepository) GetUserByEmail(ctx context.Context, email string) (d
 	var output domain.UserEntity
 
 	query := `
-		SELECT id, email, username, hashed_password FROM users
+		SELECT id, email, username, hashed_password, is_admin FROM users
 		WHERE email = $1
 	`
-	err := p.r.QueryRowContext(ctx, query, email).Scan(&output.ID, &output.Email, &output.Username, &output.HashedPassword)
+	err := p.r.QueryRowContext(ctx, query, email).Scan(&output.ID, &output.Email, &output.Username, &output.HashedPassword, &output.IsAdmin)
 
 	return output, err
 }
@@ -129,4 +132,90 @@ func (p *ProfileRepository) Update(ctx context.Context, user *domain.User) (*dom
 	}
 
 	return &updated, nil
+}
+
+func (p *ProfileRepository) GetAllUsers(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.User, error) {
+	var users []*domain.User
+
+	query := `
+        SELECT 
+            id, email, username, bio, image_url, 
+            profile_status, is_admin, created_at, updated_at
+        FROM users
+    `
+
+	args := []any{}
+	where := []string{}
+
+	if input.Username != "" {
+		where = append(where, fmt.Sprintf("username ILIKE $%d", len(args)+1))
+		args = append(args, "%"+input.Username+"%")
+	}
+
+	if input.Key != "" && input.Value != "" {
+		where = append(where, fmt.Sprintf("%s ILIKE $%d", input.Key, len(args)+1))
+		args = append(args, "%"+input.Value+"%")
+	}
+
+	if len(where) > 0 {
+		query += " WHERE " + strings.Join(where, " AND ")
+	}
+
+	sortField := "created_at"
+	if input.Sort != "" {
+		allowed := map[string]bool{
+			"username": true, "email": true, "created_at": true, "is_admin": true,
+		}
+		if allowed[input.Sort] {
+			sortField = input.Sort
+		}
+	}
+
+	order := "DESC"
+	if strings.ToLower(input.Order) == "asc" {
+		order = "ASC"
+	}
+
+	query += fmt.Sprintf(" ORDER BY %s %s", sortField, order)
+
+	rows, err := p.r.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user domain.User
+		var bio, imageURL, profileStatus *string
+
+		err := rows.Scan(
+			&user.ID,
+			&user.Email,
+			&user.Username,
+			&bio,
+			&imageURL,
+			&profileStatus,
+			&user.IsAdmin,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+
+		user.Bio = nullStringToPtr(bio)
+		user.ImageURL = nullStringToPtr(imageURL)
+		user.ProfileStatus = nullStringToPtr(profileStatus)
+
+		users = append(users, &user)
+	}
+
+	return users, rows.Err()
+}
+
+func nullStringToPtr(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	return s
 }

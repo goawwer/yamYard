@@ -34,9 +34,8 @@
             @if (recipes.length > 0) {
             <div class="profile-feed-container">
                 @for (recipe of recipes; track recipe.id) {
-                <app-post-card [recipeId]="recipe.id" [currentAvatarUrl]="currentAvatarUrl()"
-                    [canManage]="isOwnProfile()" (like)="toggleLike(recipe.id)" (edit)="openRecipeEdit(recipe)"
-                    (delete)="deleteRecipe(recipe)">
+                <app-post-card [recipe]="recipe" [canManage]="isOwnProfile()" (like)="toggleLike(recipe.id)"
+                    (edit)="openRecipeEdit(recipe)" (delete)="deleteRecipe(recipe)">
                 </app-post-card>
                 }
             </div>
@@ -62,7 +61,7 @@
             @if (liked.length > 0) {
             <div class="profile-feed-container">
                 @for (recipe of liked; track recipe.id) {
-                <app-post-card [recipeId]="recipe.id" [currentAvatarUrl]="currentAvatarUrl()" [canManage]="false"
+                <app-post-card [recipe]="recipe" (like)="toggleLike(recipe.id)" [canManage]="isOwnProfile()"
                     (like)="toggleLike(recipe.id)">
                 </app-post-card>
                 }
@@ -99,8 +98,8 @@
                 <div class="avatar-preview">
                     @if (previewUrl(); as url) {
                     <img [src]="url" alt="Preview" />
-                    } @else if (currentAvatarUrl(); as current) {
-                    <img [src]="current" alt="Current avatar" />
+                    } @else if (user$ | async; as user) {
+                    <img [src]="user.image_url" alt="Current avatar" />
                     } @else {
                     <mat-icon class="placeholder">account_circle</mat-icon>
                     }

@@ -47,13 +47,30 @@ func (r *RecipeRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.R
 	var recipe domain.Recipe
 
 	query := `
-		SELECT * FROM recipes 
-		WHERE id = $1
+		SELECT 
+			r.id,
+			r.author_id,
+			u.username,
+			u.image_url AS author_avatar_url,
+			r.title,
+			r.description,
+			r.ingredients,
+			r.cooking_time,
+			r.difficulty,
+			r.image_url,
+			r.created_at,
+			r.updated_at,
+			r.likes_count
+		FROM recipes r
+		JOIN users u ON r.author_id = u.id
+		WHERE r.id = $1
 	`
 
 	err := r.r.QueryRowContext(ctx, query, id).Scan(
 		&recipe.ID,
 		&recipe.AuthorID,
+		&recipe.AuthorUsername,
+		&recipe.AuthorAvatarURL,
 		&recipe.Title,
 		&recipe.Description,
 		&recipe.Ingredients,
@@ -149,7 +166,8 @@ func (r *RecipeRepository) GetAll(ctx context.Context, input helpers.FilterAndSo
 		}
 
 		rec.AuthorUsername = username
-		rec.IsLiked = isLiked // NEW
+		rec.IsLiked = isLiked
+		rec.AuthorAvatarURL = authorAvatarURL
 		recipes = append(recipes, &rec)
 	}
 

@@ -13,8 +13,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/goawwer/yamyard/internal/controller/handlers/wrapper"
+	"github.com/goawwer/yamyard/internal/domain"
 	"github.com/goawwer/yamyard/internal/dto"
 	"github.com/goawwer/yamyard/internal/middleware"
+	"github.com/goawwer/yamyard/pkg/helpers"
 	"github.com/goawwer/yamyard/pkg/logger"
 	"github.com/google/uuid"
 )
@@ -202,4 +204,9 @@ func (h *Handlers) UpdateUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (a
 	}
 
 	return u, nil
+}
+
+func (h *Handlers) GetAllUsers(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
+	params := helpers.GetValidQueryParameters(w.Request(), domain.User{})
+	return h.profile.GetAllUsers(w.Request().Context(), params)
 }

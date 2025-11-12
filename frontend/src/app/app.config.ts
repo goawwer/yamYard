@@ -5,6 +5,8 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { provideAnimations, provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -19,5 +21,6 @@ export const appConfig: ApplicationConfig = {
             )
         ),
         provideRouter(routes),
+        provideNoopAnimations()
     ]
 };

@@ -13,7 +13,6 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../helpers/dialog/dialog.component';
 import { RecipeQuery } from '../../../core/store/recipe/recipe.query';
-
 @Component({
     selector: 'app-profile',
     imports: [PROFILECOMPONENTS],
@@ -24,7 +23,7 @@ export class ProfileComponent implements OnInit {
     isUpdating = signal(false);
     user$!: Observable<User | undefined>;
     recipes$!: Observable<Recipe[]>;
-    likedRecipes$!: Observable<Recipe[]>;        // NEW
+    likedRecipes$!: Observable<Recipe[]>;
     editForm = new FormGroup({
         username: new FormControl(''),
         profileStatus: new FormControl(''),
@@ -68,7 +67,7 @@ export class ProfileComponent implements OnInit {
         const isMeRoute = this.route.snapshot.routeConfig?.path === 'me';
 
         this.user$ = isMeRoute
-            ? this.userService.getAuthenticatedUser()
+            ? this.userQuery.selectActive()
             : this.route.paramMap.pipe(
                 switchMap(params => {
                     const id = params.get('id');
@@ -106,9 +105,7 @@ export class ProfileComponent implements OnInit {
     onFileSelected(event: Event) {
         const input = event.target as HTMLInputElement;
         if (!input.files?.length) return;
-
         this.selectedFile = input.files[0];
-
         // create a safe preview URL
         const objectUrl = URL.createObjectURL(this.selectedFile);
         this.previewUrl.set(this.sanitizer.bypassSecurityTrustUrl(objectUrl));
@@ -116,10 +113,8 @@ export class ProfileComponent implements OnInit {
 
     editProfile() {
         const userValues: Partial<isUpdatingUser> = this.editForm.value;
-
         this.user$.pipe(take(1)).subscribe(activeUser => {
             if (!activeUser) return;
-
             this.userService.updateUser(activeUser.id, userValues, this.selectedFile)
                 .subscribe({
                     next: () => {
@@ -136,7 +131,6 @@ export class ProfileComponent implements OnInit {
 
     toggleUpdateForm() {
         this.isUpdating.update(v => !v);
-
         if (this.isUpdating()) {
             this.user$.pipe(take(1)).subscribe(user => {
                 if (user) {
@@ -160,16 +154,13 @@ export class ProfileComponent implements OnInit {
 
     onOverlayClick(event: MouseEvent) {
         const target = event.target as HTMLElement;
-
         if (!target.classList.contains('overlay')) return;
-
         if (this.isUpdating()) {
             this.toggleUpdateForm();
         } else if (this.isEditingRecipe()) {
             this.closeRecipeEdit();
         }
     }
-
 
     openRecipeEdit(recipe: Recipe) {
         this.editingRecipeId.set(recipe.id);
@@ -200,7 +191,6 @@ export class ProfileComponent implements OnInit {
     onRecipeFileSelected(event: Event) {
         const input = event.target as HTMLInputElement;
         if (!input.files?.length) return;
-
         this.selectedRecipeFile = input.files[0];
         const objectUrl = URL.createObjectURL(this.selectedRecipeFile);
         this.recipePreviewUrl.set(this.sanitizer.bypassSecurityTrustUrl(objectUrl));
@@ -208,9 +198,7 @@ export class ProfileComponent implements OnInit {
 
     updateRecipe() {
         if (!this.editingRecipeId() || this.recipeEditForm.invalid) return;
-
         const formValue: Partial<isUpdatingRecipe> = this.recipeEditForm.getRawValue();
-
         this.recipeService.updateRecipe(
             this.editingRecipeId()!,
             formValue,
@@ -226,7 +214,6 @@ export class ProfileComponent implements OnInit {
             error: (err) => console.error('Update recipe failed', err)
         });
     }
-
     deleteRecipe(recipe: Recipe) {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             width: '320px',
@@ -235,7 +222,6 @@ export class ProfileComponent implements OnInit {
                 message: `Вы уверены, что хотите удалить "${recipe.title}"?`,
             },
         });
-
         dialogRef.afterClosed().subscribe((confirmed) => {
             if (confirmed) {
                 this.recipeService.deleteRecipe(recipe.id).pipe(
@@ -250,7 +236,6 @@ export class ProfileComponent implements OnInit {
             }
         });
     }
-
     toggleLike(id: string) {
         this.recipeService.toggleLike(id).pipe(
             // After like/unlike, refresh liked recipes

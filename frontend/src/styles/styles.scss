@@ -44,16 +44,8 @@ html {
     &__logo {
         display: flex;
         align-items: center;
-        height: 40px;
-        width: 40px;
-
-
-        img {
-            height: 100%;
-            width: 100%;
-            object-fit: contain;
-            border-radius: 5px;
-        }
+        font-size: 24px;
+        font-weight: 600;
     }
 
     &__menu {
@@ -76,7 +68,6 @@ html {
     }
 
     .profile-icon {
-        color: gray;
         transform: scale(2);
     }
 }

@@ -8,10 +8,11 @@
         <!-- PROFILE PAGE LAYOUT -->
         <div class="left">
             <div mat-card-avatar class="author-avatar">
-                @if (currentAvatarUrl) {
-                <img [src]="currentAvatarUrl" alt="Avatar" class="avatar-img">
+                @if (recipe.author_avatar_url) {
+                <img [src]="recipe.author_avatar_url + '?v=' + (recipe.updated_at)" alt="{{ recipe.author_username }}"
+                    class="avatar-img">
                 } @else {
-                <mat-icon>person</mat-icon>
+                <mat-icon>account_circle</mat-icon>
                 }
             </div>
             <mat-card-title class="author-name">{{ recipe.author_username }}</mat-card-title>
@@ -34,10 +35,10 @@
         <!-- FEED PAGE LAYOUT -->
         <a [routerLink]="['/user', recipe.author_id]">
             <div mat-card-avatar class="author-avatar">
-                @if (currentAvatarUrl) {
-                <img [src]="currentAvatarUrl" alt="Avatar" class="avatar-img">
+                @if (recipe.author_avatar_url) {
+                <img [src]="recipe.author_avatar_url" alt="{{ recipe.author_username }}" class="avatar-img">
                 } @else {
-                <mat-icon>person</mat-icon>
+                <mat-icon>account_circle</mat-icon>
                 }
             </div>
             <mat-card-title class="author-name">{{ recipe.author_username }}</mat-card-title>

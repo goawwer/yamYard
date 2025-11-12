@@ -14,6 +14,7 @@ import { AuthorizedLayoutComponent } from './shared/layout/authorized/authorized
 import { ProfileComponent } from './shared/pages/profile/profile';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AdminComponent } from './shared/pages/admin/admin';
+import { InfoComponent } from './shared/pages/info/info';
 
 export const routes: Routes = [
     // Public pages
@@ -23,6 +24,7 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: '/home', pathMatch: 'full' },
             { path: 'home', component: HomeComponent },
+            { path: 'info', component: InfoComponent }
         ]
     },
 
@@ -51,13 +53,11 @@ export const routes: Routes = [
     },
 
     {
-        path: '',
+        path: 'admin',
         component: AuthorizedLayoutComponent,
-        canActivate: [AdminGuard],
+        canActivate: [AuthGuard, AdminGuard],
         children: [
-            // Redirect empty path '' to 'feed' for authorized users
-            { path: '', redirectTo: 'feed', pathMatch: 'full' },
-            { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] }
+            { path: '', component: AdminComponent }
         ]
     },
 

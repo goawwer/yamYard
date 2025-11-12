@@ -8,19 +8,19 @@
     </mat-button-toggle-group>
 
     <!-- Фильтр -->
-    <form [formGroup]="filterForm" class="filter-form">
-        <mat-form-field appearance="outline">
-            <mat-label>Фильтр по имени</mat-label>
-            <mat-select formControlName="username">
-                <mat-option [value]=""></mat-option>
-                @for (item of filteredData$ | async; track item.id) {
-                <mat-option [value]="mode === 'users' ? item.username : item.author_username">
-                    {{ mode === 'users' ? item.username : item.author_username }}
-                </mat-option>
-                }
-            </mat-select>
+    <div class="filter-section">
+        <mat-form-field appearance="outline" class="search-field">
+            <mat-label>
+                Поиск по имени {{ mode() === 'users' ? 'пользователя' : 'автора' }}
+            </mat-label>
+            <input matInput [formControl]="searchCtrl" placeholder="Введите имя..." #searchInput>
+            <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
-    </form>
+
+        <button mat-icon-button (click)="clearSearch()" [style.visibility]="searchCtrl.value ? 'visible' : 'hidden'">
+            <mat-icon>clear</mat-icon>
+        </button>
+    </div>
 
     <!-- Таблица -->
     <div class="table-container">
@@ -28,13 +28,13 @@
         @if (data.length > 0) {
         <table mat-table [dataSource]="data" class="mat-elevation-z2">
 
-            @for (header of mode === 'users' ? userHeaders : recipeHeaders; track header.key) {
+            @for (header of mode() === 'users' ? userHeaders : recipeHeaders; track header.key) {
             <ng-container matColumnDef="{{header.key}}">
                 <th mat-header-cell *matHeaderCellDef> {{ header.value }} </th>
                 <td mat-cell *matCellDef="let item">
                     @if (header.key === 'actions') {
                     <button mat-icon-button color="warn"
-                        (click)="mode === 'users' ? deleteUser(item) : deleteRecipe(item)">
+                        (click)="mode() === 'users' ? deleteUser(item) : deleteRecipe(item)">
                         <mat-icon>delete</mat-icon>
                     </button>
                     } @else if (header.key === 'is_admin') {

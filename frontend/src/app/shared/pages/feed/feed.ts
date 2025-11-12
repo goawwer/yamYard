@@ -24,7 +24,7 @@ export class FeedComponent {
     isCreating = signal(false);
     currentSort = signal<Sort | null>(null);
     currentFilter = signal<{ column: string; value: string } | undefined>(undefined);
-    currentAvatarUrl = signal<string | null>(null);
+    avatarURL = signal<string | null>(null);
     user$!: Observable<User | undefined>;
     filterForm: FormGroup = new FormGroup({
         username: new FormControl(''),
@@ -75,7 +75,7 @@ export class FeedComponent {
 
         this.user$.subscribe(user => {
             if (user?.image_url) {
-                this.currentAvatarUrl.set(user.image_url);
+                this.avatarURL.set(user.image_url);
             }
         });
     }
@@ -126,6 +126,7 @@ export class FeedComponent {
             id: crypto.randomUUID(),
             author_id: activeUser.id,
             author_username: activeUser.username,
+            author_avatar_url: activeUser.image_url!,
             title: this.recipeForm.value.title!,
             description: this.recipeForm.value.description!,
             ingredients: this.recipeForm.value.ingredients!,

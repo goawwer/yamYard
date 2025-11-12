@@ -27,11 +27,15 @@
     }
 
     // Фильтр
-    .filter-form {
-        margin-bottom: 24px;
+    .filter-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
 
-        mat-form-field {
-            width: 300px;
+        .search-field {
+            flex: 1;
+            max-width: 400px;
         }
     }
 

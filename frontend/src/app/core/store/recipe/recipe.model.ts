@@ -2,6 +2,7 @@ export interface Recipe {
     id: string;
     author_id: string;
     author_username: string;
+    author_avatar_url: string;
     title: string;
     description: string;
     ingredients: string;
