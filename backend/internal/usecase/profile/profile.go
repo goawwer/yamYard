@@ -64,15 +64,30 @@ func (p *ProfileService) GetUser(ctx context.Context, userId uuid.UUID) (*domain
 	return p.repo.GetUserById(ctx, userId)
 }
 
-func (p *ProfileService) UpdateUser(ctx context.Context, userId uuid.UUID, imageUrl string) (*domain.User, error) {
-	u, err := p.GetUser(ctx, userId)
-	if err != nil {
-		return nil, fmt.Errorf("user not found")
-	}
+// profile/usecase.go
+func (p *ProfileService) UpdateUser(ctx context.Context, updateUser *domain.User) (*domain.User, error) {
+    // Получаем текущего пользователя
+    current, err := p.GetUser(ctx, updateUser.ID)
+    if err != nil {
+        return nil, fmt.Errorf("user not found: %w", err)
+    }
 
-	u.ImageURL = &imageUrl
+    // Частично обновляем только те поля, которые != nil
+    if updateUser.Username != "" {
+        current.Username = updateUser.Username
+    }
+    if updateUser.ProfileStatus != nil {
+        current.ProfileStatus = updateUser.ProfileStatus
+    }
+    if updateUser.Bio != nil {
+        current.Bio = updateUser.Bio
+    }
+    if updateUser.ImageURL != nil {
+        current.ImageURL = updateUser.ImageURL
+    }
 
-	return p.repo.Update(ctx, u)
+    // Обновляем в репозитории
+    return p.repo.Update(ctx, current)
 }
 
 func (p *ProfileService) GetAllUsers(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.User, error) {

@@ -11,8 +11,8 @@
 
     <div class="user-info">
         <h2>{{ user.username }}</h2>
-        @if (user.profileStatus) {
-        <p class="status">{{ user.profileStatus }}</p>
+        @if (user.profile_status) {
+        <p class="status">{{ user.profile_status }}</p>
         }
         @if (user.bio) {
         <p class="bio">{{ user.bio }}</p>
@@ -117,11 +117,17 @@
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Имя пользователя</mat-label>
                 <input matInput formControlName="username" />
+
+                @if (editForm.get('username')?.hasError('minlength')) {
+                  <mat-error>
+                    Имя пользотваеля должно иметь минимум 5 символов
+                  </mat-error>
+                }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Статус</mat-label>
-                <input matInput formControlName="profileStatus" />
+                <input matInput formControlName="profile_status" />
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">

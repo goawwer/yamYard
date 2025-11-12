@@ -4,7 +4,7 @@ export interface User {
     username: string;
     hashedPassword: string;
     bio?: string;
-    profileStatus?: string;
+    profile_status?: string;
     image_url?: string;
     is_admin: string;
     createdAt: string;

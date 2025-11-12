@@ -90,48 +90,64 @@ func (p *ProfileRepository) ExistsByID(ctx context.Context, id uuid.UUID) (bool,
 	return exists, err
 }
 
+// profile/repository.go
 func (p *ProfileRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
-	query := `
+    query := `
         UPDATE users
-        SET 
-            username = $1,
-            profile_status = $2,
-            bio = $3,
-			image_url = $4,
-            updated_at = current_timestamp
-        WHERE id = $5
+        SET updated_at = current_timestamp
+    `
+    var args []any
+    argID := 1
+
+    if user.Username != "" {
+        query += fmt.Sprintf(", username = $%d", argID)
+        args = append(args, user.Username)
+        argID++
+    }
+    if user.ProfileStatus != nil {
+        query += fmt.Sprintf(", profile_status = $%d", argID)
+        args = append(args, *user.ProfileStatus)
+        argID++
+    }
+    if user.Bio != nil {
+        query += fmt.Sprintf(", bio = $%d", argID)
+        args = append(args, *user.Bio)
+        argID++
+    }
+    if user.ImageURL != nil {
+        query += fmt.Sprintf(", image_url = $%d", argID)
+        args = append(args, *user.ImageURL)
+        argID++
+    }
+
+    query += fmt.Sprintf(" WHERE id = $%d", argID)
+    args = append(args, user.ID)
+
+    query += `
         RETURNING 
-            id, username, email, hashed_password, 
-            bio, image_url, profile_status, is_admin, 
-            created_at, updated_at
+            id, email, username, hashed_password, bio, image_url, 
+            profile_status, is_admin, created_at, updated_at
     `
 
-	var updated domain.User
+    var updated domain.User
+    err := p.r.QueryRowContext(ctx, query, args...).Scan(
+        &updated.ID,
+        &updated.Email,
+        &updated.Username,
+        &updated.HashedPassword,
+        &updated.Bio,
+        &updated.ImageURL,
+        &updated.ProfileStatus,
+        &updated.IsAdmin,
+        &updated.CreatedAt,
+        &updated.UpdatedAt,
+    )
 
-	err := p.r.QueryRowContext(ctx, query,
-		user.Username,
-		user.ProfileStatus,
-		user.Bio,
-		user.ImageURL,
-		user.ID,
-	).Scan(
-		&updated.ID,
-		&updated.Username,
-		&updated.Email,
-		&updated.HashedPassword,
-		&updated.Bio,
-		&updated.ImageURL,
-		&updated.ProfileStatus,
-		&updated.IsAdmin,
-		&updated.CreatedAt,
-		&updated.UpdatedAt,
-	)
+    if err != nil {
+        return nil, err
+    }
 
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
+    return &updated, nil
 }
 
 func (p *ProfileRepository) GetAllUsers(ctx context.Context, input helpers.FilterAndSortingParameters) ([]*domain.User, error) {

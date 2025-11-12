@@ -7,7 +7,7 @@ import { RecipeService } from '../../../core/store/recipe/recipe.service';
 import { ActivatedRoute } from '@angular/router';
 import { Sort } from '@angular/material/sort';
 import { isUpdatingRecipe, Recipe } from '../../../core/store/recipe/recipe.model';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { PROFILECOMPONENTS } from './profile.imports';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,8 +25,8 @@ export class ProfileComponent implements OnInit {
     recipes$!: Observable<Recipe[]>;
     likedRecipes$!: Observable<Recipe[]>;
     editForm = new FormGroup({
-        username: new FormControl(''),
-        profileStatus: new FormControl(''),
+        username: new FormControl('', [Validators.minLength(5)]),
+        profile_status: new FormControl(''),
         bio: new FormControl(''),
     });
     selectedFile?: File;
@@ -137,7 +137,7 @@ export class ProfileComponent implements OnInit {
                     this.editForm.patchValue({
                         username: user.username,
                         bio: user.bio,
-                        profileStatus: user.profileStatus,
+                        profile_status: user.profile_status,
                     });
                 }
             });

@@ -169,41 +169,74 @@ func (h *Handlers) GetUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any,
 }
 
 func (h *Handlers) UpdateUser(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
-	file, header, err := w.Request().FormFile("avatar")
-	if err != nil {
-		return nil, wrapper.NewError(http.StatusBadRequest, "failed to read file with avatar")
-	}
-	defer file.Close()
+    // Парсим multipart/form-data
+    if err := w.Request().ParseMultipartForm(10 << 20); err != nil {
+        return nil, wrapper.NewError(http.StatusBadRequest, "failed to parse form")
+    }
 
-	os.MkdirAll("uploads/avatars", os.ModePerm)
+    updateUser := &domain.User{
+        ID: c.UserID,
+    }
 
-	filename := fmt.Sprintf("%s-%d%s",
-		c.UserID.String(),
-		time.Now().Unix(),
-		filepath.Ext(header.Filename),
-	)
+    // Читаем текстовые поля
+    if v := w.Request().FormValue("username"); v != "" {
+        updateUser.Username = v
+    }
+    if v := w.Request().FormValue("profile_status"); v != "" {
+        updateUser.ProfileStatus = &v
+    }
+    if v := w.Request().FormValue("bio"); v != "" {
+        updateUser.Bio = &v
+    }
+    if v := w.Request().FormValue("image_url"); v != "" {
+        updateUser.ImageURL = &v
+    }
 
-	path := filepath.Join("uploads/avatars", filename)
-	dst, err := os.Create(path)
-	if err != nil {
-		return nil, err
-	}
-	defer dst.Close()
+    // Обрабатываем файл аватарки
+    if file, header, err := w.Request().FormFile("avatar"); err == nil {
+        defer file.Close()
 
-	_, err = io.Copy(dst, file)
-	if err != nil {
-		return nil, err
-	}
+        if err := os.MkdirAll("uploads/avatars", os.ModePerm); err != nil {
+            return nil, err
+        }
 
-	imageURL := "/uploads/avatars/" + filename
+        filename := fmt.Sprintf("%s-%d%s", c.UserID.String(), time.Now().Unix(), filepath.Ext(header.Filename))
+        path := filepath.Join("uploads/avatars", filename)
+        dst, err := os.Create(path)
+        if err != nil {
+            return nil, err
+        }
+        defer dst.Close()
 
-	// Save to DB
-	u, err := h.profile.UpdateUser(w.Request().Context(), c.UserID, imageURL)
-	if err != nil {
-		return nil, err
-	}
+        if _, err := io.Copy(dst, file); err != nil {
+            return nil, err
+        }
 
-	return u, nil
+        imageURL := "/uploads/avatars/" + filename
+        updateUser.ImageURL = &imageURL
+    } else if err != http.ErrMissingFile {
+        return nil, wrapper.NewError(http.StatusBadRequest, "invalid avatar file")
+    }
+    // Если http.ErrMissingFile — просто не трогаем аватарку
+
+    // Если ничего не пришло — можно вернуть ошибку или просто обновить `updated_at`
+    if updateUser.Username == "" && updateUser.ProfileStatus == nil && 
+       updateUser.Bio == nil && updateUser.ImageURL == nil {
+        // Можно вернуть текущее состояние или ошибку
+        current, err := h.profile.GetUser(w.Request().Context(), c.UserID)
+        if err != nil {
+            return nil, err
+        }
+        return current, nil
+    }
+
+    // Обновляем
+    updated, err := h.profile.UpdateUser(w.Request().Context(), updateUser)
+    if err != nil {
+        return nil, err
+    }
+
+    return updated, nil
 }
 
 func (h *Handlers) GetAllUsers(w *wrapper.Wrapper, c *middleware.CustomClaims) (any, error) {
