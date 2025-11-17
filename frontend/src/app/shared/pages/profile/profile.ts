@@ -209,7 +209,6 @@ export class ProfileComponent implements OnInit {
         ).subscribe({
             next: (updatedRecipes) => {
                 this.closeRecipeEdit();
-                this.recipes$ = of(updatedRecipes);
             },
             error: (err) => console.error('Update recipe failed', err)
         });
